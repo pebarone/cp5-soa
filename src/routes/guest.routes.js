@@ -1,8 +1,9 @@
 // src/routes/guest.routes.js
 const express = require('express');
-const { body, param } = require('express-validator'); // Para validação
+const { param } = require('express-validator'); // Para validação
 const guestController = require('../controllers/guest.controller');
 const validate = require('../middlewares/validation.middleware'); // Middleware de validação
+const { GuestRequestDTO } = require('../dtos/guest.dto'); // Importa o DTO
 
 const router = express.Router();
 
@@ -19,7 +20,6 @@ const router = express.Router();
  *       properties:
  *         id:
  *           type: string
- *           format: uuid
  *           description: O ID do hóspede.
  *         fullName:
  *           type: string
@@ -40,23 +40,34 @@ const router = express.Router();
  *         document: "12345678900"
  *         email: "john.doe@example.com"
  *         phone: "11987654321"
+ *     NewGuest:
+ *       type: object
+ *       required:
+ *         - fullName
+ *         - document
+ *         - email
+ *       properties:
+ *         fullName:
+ *           type: string
+ *           description: O nome completo do hóspede.
+ *         document:
+ *           type: string
+ *           description: O documento do hóspede.
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: O email do hóspede.
+ *         phone:
+ *           type: string
+ *           description: O telefone do hóspede.
+ *       example:
+ *         fullName: "Jane Doe"
+ *         document: "09876543211"
+ *         email: "jane.doe@example.com"
+ *         phone: "11912345678"
  */
 
 // --- Regras de Validação ---
-const guestValidationRules = [
-    body('fullName').trim().notEmpty().withMessage('Nome completo é obrigatório.').isLength({ min: 3 }).withMessage('Nome completo deve ter pelo menos 3 caracteres.'),
-    body('document').trim().notEmpty().withMessage('Documento é obrigatório.'),
-    body('email').isEmail().withMessage('Formato de e-mail inválido.').normalizeEmail(),
-    body('phone').optional({ checkFalsy: true }).trim().isLength({ min: 8 }).withMessage('Telefone deve ter pelo menos 8 dígitos, se informado.')
-];
-
-const guestUpdateValidationRules = [ // Permite atualizar sem reenviar tudo, valida o que vier
-    body('fullName').optional().trim().notEmpty().withMessage('Nome completo não pode ser vazio.').isLength({ min: 3 }).withMessage('Nome completo deve ter pelo menos 3 caracteres.'),
-    body('email').optional().isEmail().withMessage('Formato de e-mail inválido.').normalizeEmail(),
-    body('phone').optional({ checkFalsy: true }).trim().isLength({ min: 8 }).withMessage('Telefone deve ter pelo menos 8 dígitos, se informado.')
-    // Não valida 'document' na atualização
-];
-
 const idParamValidationRule = [
     param('id').isUUID(4).withMessage('ID de Hóspede inválido (deve ser UUID v4).')
 ];
@@ -74,16 +85,20 @@ const idParamValidationRule = [
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Guest'
+ *             $ref: '#/components/schemas/NewGuest'
  *     responses:
  *       201:
  *         description: Hóspede criado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Guest'
  *       422:
  *         description: Erro de validação.
  */
 router.post(
     '/',
-    guestValidationRules, // Aplica regras de validação
+    GuestRequestDTO.validate(), // Aplica regras de validação do DTO
     validate, // Verifica os resultados da validação
     guestController.create
 );
@@ -168,7 +183,7 @@ router.get(
 router.put(
     '/:id',
     idParamValidationRule, // Valida ID
-    guestUpdateValidationRules, // Valida corpo (opcionalmente)
+    GuestRequestDTO.validateUpdate(), // Valida corpo (opcionalmente)
     validate,
     guestController.update
 );

@@ -111,27 +111,6 @@ CREATE INDEX idx_reservas_reservations_room ON RESERVAS_RESERVATIONS (room_id);
 CREATE INDEX idx_reservas_reservations_status ON RESERVAS_RESERVATIONS (status);
 CREATE INDEX idx_reservas_res_date_range ON RESERVAS_RESERVATIONS (checkin_expected, checkout_expected);
 
-
--- --- SEED (exemplos) ---
-INSERT INTO RESERVAS_GUESTS (id, full_name, document, email, phone) VALUES ('11111111-1111-1111-1111-111111111111', 'Ana Silva', '12345678901', 'ana@example.com', '+55-11-99999-1111');
-INSERT INTO RESERVAS_GUESTS (id, full_name, document, email, phone) VALUES ('22222222-2222-2222-2222-222222222222', 'Bruno Souza', '98765432100', 'bruno@example.com', '+55-21-98888-2222');
-
-INSERT INTO RESERVAS_ROOMS (id, "NUMBER", type, capacity, price_per_night, status) VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 101, 'STANDARD', 2, 250.00, 'ATIVO'); -- Use quoted name
-INSERT INTO RESERVAS_ROOMS (id, "NUMBER", type, capacity, price_per_night, status) VALUES ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 201, 'DELUXE', 3, 380.00, 'ATIVO'); -- Use quoted name
-INSERT INTO RESERVAS_ROOMS (id, "NUMBER", type, capacity, price_per_night, status) VALUES ('cccccccc-cccc-cccc-cccc-cccccccccccc', 301, 'SUITE', 4, 520.00, 'ATIVO'); -- Use quoted name
-
-INSERT INTO RESERVAS_RESERVATIONS (id, guest_id, room_id, checkin_expected, checkout_expected, status, estimated_amount, created_at)
-VALUES (
-    '99999999-9999-9999-9999-999999999999',
-    '11111111-1111-1111-1111-111111111111',
-    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    TO_DATE('2025-11-05', 'YYYY-MM-DD'),
-    TO_DATE('2025-11-07', 'YYYY-MM-DD'),
-    'CREATED',
-    500.00, -- 2 * 250.00
-    SYSTIMESTAMP
-);
-
 COMMIT;
 
 -- ========= FIM DO SCRIPT ==========
