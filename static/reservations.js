@@ -440,15 +440,20 @@ window.viewReservation = async function(id) {
                     </div>
                 </div>
                 
-                ${reservation.room?.pricePerNight ? `
+                ${reservation.pricePerNightAtBooking ? `
                     <div class="form-group">
                         <label class="form-label">Valor Estimado</label>
                         <p style="font-size: 1.5rem; font-weight: 600; color: var(--color-success);">
                             R$ ${calculateTotal(reservation)}
                         </p>
                         <p class="text-muted" style="font-size: 0.875rem;">
-                            ${calculateNights(reservation.checkinExpected, reservation.checkoutExpected)} noite(s) × R$ ${parseFloat(reservation.room.pricePerNight).toFixed(2)}
+                            ${calculateNights(reservation.checkinExpected, reservation.checkoutExpected)} noite(s) × R$ ${parseFloat(reservation.pricePerNightAtBooking).toFixed(2)}
                         </p>
+                        ${reservation.room?.pricePerNight && parseFloat(reservation.pricePerNightAtBooking) !== parseFloat(reservation.room.pricePerNight) ? `
+                            <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                                💡 Preço atual do quarto: R$ ${parseFloat(reservation.room.pricePerNight).toFixed(2)}
+                            </p>
+                        ` : ''}
                     </div>
                 ` : ''}
                 
@@ -487,7 +492,9 @@ function calculateNights(checkin, checkout) {
 
 function calculateTotal(reservation) {
     const nights = calculateNights(reservation.checkinExpected, reservation.checkoutExpected);
-    const total = nights * parseFloat(reservation.room.pricePerNight);
+    // Usa o preço fixado no momento da reserva, não o preço atual do quarto
+    const pricePerNight = reservation.pricePerNightAtBooking || reservation.room?.pricePerNight || 0;
+    const total = nights * parseFloat(pricePerNight);
     return total.toFixed(2);
 }
 

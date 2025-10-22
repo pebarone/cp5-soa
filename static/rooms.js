@@ -6,6 +6,9 @@ const ROOM_TYPES = ['STANDARD', 'DELUXE', 'SUITE'];
 const ROOM_STATUS = ['ATIVO', 'INATIVO'];
 
 export function renderRoomsPage() {
+    // Data mínima = hoje
+    const today = new Date().toISOString().split('T')[0];
+    
     const content = `
         <div class="page-header">
             <div>
@@ -21,26 +24,36 @@ export function renderRoomsPage() {
             </button>
         </div>
 
-        <div class="filters">
-            <h3 class="filters-title">Filtrar Disponibilidade</h3>
+        <div class="filters" id="filters-container">
+            <h3 class="filters-title">🔍 Buscar Quartos Disponíveis</h3>
+            <p style="margin-bottom: 1rem; color: var(--color-text-muted); font-size: 0.875rem;">
+                Preencha as datas de check-in e check-out para verificar a disponibilidade dos quartos
+            </p>
             <form id="filter-form" class="form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Data Inicial</label>
-                        <input type="date" class="form-input" name="availableFrom" id="filter-from">
+                        <label class="form-label required">Check-in</label>
+                        <input type="date" class="form-input" name="availableFrom" id="filter-from" min="${today}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Data Final</label>
-                        <input type="date" class="form-input" name="availableTo" id="filter-to">
+                        <label class="form-label required">Check-out</label>
+                        <input type="date" class="form-input" name="availableTo" id="filter-to" min="${today}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Capacidade Mínima</label>
-                        <input type="number" class="form-input" name="capacity" id="filter-capacity" min="1" placeholder="Ex: 2">
+                        <input type="number" class="form-input" name="capacity" id="filter-capacity" min="1" placeholder="Opcional (padrão: 1)">
+                        <small style="display: block; margin-top: 0.25rem; color: var(--color-text-muted); font-size: 0.75rem;">Deixe em branco para qualquer capacidade</small>
                     </div>
                 </div>
                 <div class="form-actions" style="justify-content: flex-start;">
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                    <button type="button" class="btn btn-secondary" id="clear-filters-btn">Limpar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 0.5rem;">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        Buscar Disponíveis
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="clear-filters-btn">Limpar e Ver Todos</button>
                 </div>
             </form>
         </div>
@@ -64,6 +77,25 @@ export function renderRoomsPage() {
         loadRooms();
     });
     
+    // Sincroniza campos de data para garantir check-out > check-in
+    const filterFrom = document.getElementById('filter-from');
+    const filterTo = document.getElementById('filter-to');
+    
+    filterFrom.addEventListener('change', () => {
+        if (filterFrom.value) {
+            // Define data mínima do check-out como 1 dia após check-in
+            const fromDate = new Date(filterFrom.value);
+            fromDate.setDate(fromDate.getDate() + 1);
+            const minCheckout = fromDate.toISOString().split('T')[0];
+            filterTo.min = minCheckout;
+            
+            // Se check-out já estiver preenchido e for menor que check-in, limpa
+            if (filterTo.value && filterTo.value <= filterFrom.value) {
+                filterTo.value = '';
+            }
+        }
+    });
+    
     // Load rooms
     loadRooms();
 }
@@ -71,10 +103,10 @@ export function renderRoomsPage() {
 async function loadRooms(filters = {}) {
     try {
         const rooms = await roomsAPI.getAll(filters);
-        renderRoomsGrid(rooms);
+        renderRoomsGrid(rooms, filters);
     } catch (error) {
         showToast(getErrorMessage(error), 'error');
-        renderRoomsGrid([]);
+        renderRoomsGrid([], filters);
     }
 }
 
@@ -83,17 +115,74 @@ function handleFilter(e) {
     const formData = new FormData(e.target);
     const filters = {};
     
-    if (formData.get('availableFrom')) filters.availableFrom = formData.get('availableFrom');
-    if (formData.get('availableTo')) filters.availableTo = formData.get('availableTo');
-    if (formData.get('capacity')) filters.capacity = formData.get('capacity');
+    const availableFrom = formData.get('availableFrom');
+    const availableTo = formData.get('availableTo');
+    const capacity = formData.get('capacity');
+    
+    // Validações no frontend
+    if (availableFrom || availableTo) {
+        // Se uma data foi preenchida, ambas devem ser preenchidas
+        if (!availableFrom || !availableTo) {
+            showToast('Para filtrar por disponibilidade, preencha as datas de check-in e check-out.', 'error');
+            return;
+        }
+        
+        // Valida se check-out é posterior ao check-in
+        const fromDate = new Date(availableFrom);
+        const toDate = new Date(availableTo);
+        
+        if (toDate <= fromDate) {
+            showToast('A data de check-out deve ser posterior à data de check-in.', 'error');
+            return;
+        }
+        
+        // Valida se as datas não estão no passado
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (fromDate < today) {
+            showToast('A data de check-in não pode ser no passado.', 'error');
+            return;
+        }
+        
+        filters.availableFrom = availableFrom;
+        filters.availableTo = availableTo;
+    }
+    
+    if (capacity) {
+        const capacityNum = parseInt(capacity);
+        if (capacityNum <= 0) {
+            showToast('A capacidade deve ser um número positivo.', 'error');
+            return;
+        }
+        filters.capacity = capacity;
+    }
+    
+    // Se nenhum filtro foi aplicado, mostra mensagem
+    if (Object.keys(filters).length === 0) {
+        showToast('Preencha ao menos as datas para filtrar os quartos disponíveis.', 'error');
+        return;
+    }
     
     loadRooms(filters);
 }
 
-function renderRoomsGrid(rooms) {
+function renderRoomsGrid(rooms, filters = {}) {
     const grid = document.getElementById('rooms-grid');
     
+    const hasFilters = Object.keys(filters).length > 0;
+    
     if (rooms.length === 0) {
+        const emptyMessage = hasFilters 
+            ? {
+                title: 'Nenhum quarto disponível',
+                description: 'Não há quartos disponíveis para o período selecionado. Tente outras datas ou ajuste a capacidade.'
+            }
+            : {
+                title: 'Nenhum quarto cadastrado',
+                description: 'Adicione o primeiro quarto para começar.'
+            };
+        
         grid.innerHTML = `
             <div class="card" style="grid-column: 1 / -1;">
                 <div class="empty-state">
@@ -101,12 +190,34 @@ function renderRoomsGrid(rooms) {
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
                     </svg>
-                    <h3>Nenhum quarto encontrado</h3>
-                    <p>Adicione quartos ou ajuste os filtros</p>
+                    <h3>${emptyMessage.title}</h3>
+                    <p>${emptyMessage.description}</p>
                 </div>
             </div>
         `;
         return;
+    }
+    
+    // Exibe mensagem de sucesso e badge quando houver filtros aplicados
+    if (hasFilters) {
+        const fromDate = filters.availableFrom ? new Date(filters.availableFrom).toLocaleDateString('pt-BR') : '';
+        const toDate = filters.availableTo ? new Date(filters.availableTo).toLocaleDateString('pt-BR') : '';
+        const capacityText = filters.capacity ? ` (capacidade mínima: ${filters.capacity})` : '';
+        showToast(`✓ ${rooms.length} quarto(s) disponível(is) de ${fromDate} a ${toDate}${capacityText}`, 'success');
+        
+        // Adiciona badge visual indicando filtros ativos
+        const filtersContainer = document.getElementById('filters-container');
+        if (filtersContainer) {
+            filtersContainer.style.borderLeft = '4px solid var(--color-success)';
+            filtersContainer.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+        }
+    } else {
+        // Remove indicador visual quando não há filtros
+        const filtersContainer = document.getElementById('filters-container');
+        if (filtersContainer) {
+            filtersContainer.style.borderLeft = '';
+            filtersContainer.style.backgroundColor = '';
+        }
     }
 
     grid.innerHTML = rooms.map(room => `

@@ -140,6 +140,7 @@ class ReservationResponseDTO {
         this.checkinExpected = reservationModel.checkinExpected;
         this.checkoutExpected = reservationModel.checkoutExpected;
         this.status = reservationModel.status;
+        this.pricePerNightAtBooking = reservationModel.pricePerNightAtBooking; // Preço do quarto no momento da reserva
         this.checkinAt = reservationModel.checkinAt; // Pode ser null, retorna como está (ISO string)
         this.checkoutAt = reservationModel.checkoutAt; // Pode ser null, retorna como está (ISO string)
         this.estimatedAmount = reservationModel.estimatedAmount; // Pode ser null

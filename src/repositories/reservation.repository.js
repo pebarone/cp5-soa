@@ -15,6 +15,7 @@ function mapReservationRowToModel(row) {
         row.CHECKIN_EXPECTED, // O driver oracledb pode retornar como Date
         row.CHECKOUT_EXPECTED, // O driver oracledb pode retornar como Date
         row.STATUS,
+        row.PRICE_PER_NIGHT_AT_BOOKING, // Preço fixo no momento da reserva
         row.CHECKIN_AT, // Pode ser null
         row.CHECKOUT_AT, // Pode ser null
         row.ESTIMATED_AMOUNT, // Pode ser null
@@ -38,12 +39,12 @@ class ReservationRepository {
         
         const sql = `INSERT INTO RESERVAS_RESERVATIONS (
                         id, guest_id, room_id, checkin_expected, checkout_expected,
-                        status, estimated_amount, created_at, updated_at
+                        status, price_per_night_at_booking, estimated_amount, created_at, updated_at
                      ) VALUES (
                         :id, :guest_id, :room_id, 
                         TO_DATE(:checkin_expected, 'YYYY-MM-DD'), 
                         TO_DATE(:checkout_expected, 'YYYY-MM-DD'),
-                        :status, :estimated_amount, SYSTIMESTAMP, SYSTIMESTAMP
+                        :status, :price_per_night_at_booking, :estimated_amount, SYSTIMESTAMP, SYSTIMESTAMP
                      )`; // created_at e updated_at inicializados
 
         const checkinFormatted = formatDateToString(reservationData.checkinExpected);
@@ -59,6 +60,7 @@ class ReservationRepository {
             checkin_expected: checkinFormatted,
             checkout_expected: checkoutFormatted,
             status: reservationData.status || Reservation.STATUS.CREATED,
+            price_per_night_at_booking: reservationData.pricePerNightAtBooking, // Preço fixo
             estimated_amount: reservationData.estimatedAmount
         };
 
@@ -75,8 +77,8 @@ class ReservationRepository {
         const sql = `SELECT id, guest_id, room_id,
                             TO_CHAR(checkin_expected, 'YYYY-MM-DD') as checkin_expected,
                             TO_CHAR(checkout_expected, 'YYYY-MM-DD') as checkout_expected,
-                            status, checkin_at, checkout_at, estimated_amount, final_amount,
-                            created_at, updated_at
+                            status, price_per_night_at_booking, checkin_at, checkout_at, 
+                            estimated_amount, final_amount, created_at, updated_at
                      FROM RESERVAS_RESERVATIONS 
                      WHERE id = :id`;
         const result = await execute(sql, { id });
@@ -100,8 +102,8 @@ class ReservationRepository {
         const sql = `SELECT id, guest_id, room_id, 
                             TO_CHAR(checkin_expected, 'YYYY-MM-DD') as checkin_expected,
                             TO_CHAR(checkout_expected, 'YYYY-MM-DD') as checkout_expected,
-                            status, checkin_at, checkout_at, estimated_amount, final_amount, 
-                            created_at, updated_at 
+                            status, price_per_night_at_booking, checkin_at, checkout_at, 
+                            estimated_amount, final_amount, created_at, updated_at 
                      FROM RESERVAS_RESERVATIONS 
                      ORDER BY created_at DESC`;
         const result = await execute(sql);
@@ -121,8 +123,8 @@ class ReservationRepository {
         const sql = `SELECT id, guest_id, room_id,
                             TO_CHAR(checkin_expected, 'YYYY-MM-DD') as checkin_expected,
                             TO_CHAR(checkout_expected, 'YYYY-MM-DD') as checkout_expected,
-                            status, checkin_at, checkout_at, estimated_amount, final_amount,
-                            created_at, updated_at
+                            status, price_per_night_at_booking, checkin_at, checkout_at, 
+                            estimated_amount, final_amount, created_at, updated_at
                      FROM RESERVAS_RESERVATIONS 
                      WHERE guest_id = :guest_id 
                      ORDER BY checkin_expected`;
@@ -143,8 +145,8 @@ class ReservationRepository {
         const sql = `SELECT id, guest_id, room_id,
                             TO_CHAR(checkin_expected, 'YYYY-MM-DD') as checkin_expected,
                             TO_CHAR(checkout_expected, 'YYYY-MM-DD') as checkout_expected,
-                            status, checkin_at, checkout_at, estimated_amount, final_amount,
-                            created_at, updated_at
+                            status, price_per_night_at_booking, checkin_at, checkout_at, 
+                            estimated_amount, final_amount, created_at, updated_at
                      FROM RESERVAS_RESERVATIONS 
                      WHERE room_id = :room_id 
                      ORDER BY checkin_expected`;
@@ -165,7 +167,12 @@ class ReservationRepository {
      * @returns {Promise<Reservation[]>} Lista de reservas conflitantes.
      */
     async findConflictingReservations(roomId, checkinDate, checkoutDate, excludeReservationId = null) {
-        let sql = `SELECT * FROM RESERVAS_RESERVATIONS
+        let sql = `SELECT id, guest_id, room_id,
+                          TO_CHAR(checkin_expected, 'YYYY-MM-DD') as checkin_expected,
+                          TO_CHAR(checkout_expected, 'YYYY-MM-DD') as checkout_expected,
+                          status, price_per_night_at_booking, checkin_at, checkout_at, 
+                          estimated_amount, final_amount, created_at, updated_at
+                   FROM RESERVAS_RESERVATIONS
                    WHERE room_id = :room_id
                      AND (status = :status_created OR status = :status_checked_in)
                      AND checkin_expected < TO_DATE(:checkout_date, 'YYYY-MM-DD')
@@ -185,7 +192,11 @@ class ReservationRepository {
         }
 
         const result = await execute(sql, binds);
-        return result.rows.map(mapReservationRowToModel);
+        return result.rows.map(row => ({
+            ...mapReservationRowToModel(row),
+            checkinExpected: row.CHECKIN_EXPECTED,
+            checkoutExpected: row.CHECKOUT_EXPECTED
+        }));
     }
 
     /**

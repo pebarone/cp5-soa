@@ -23,18 +23,29 @@ class RoomController {
         const { availableFrom, availableTo, capacity } = req.query;
 
         let rooms;
-        if (availableFrom && availableTo && capacity) {
+        // Verifica se pelo menos um filtro de disponibilidade foi fornecido
+        if (availableFrom || availableTo || capacity) {
+            // Se algum filtro foi fornecido, todos são necessários
+            if (!availableFrom || !availableTo) {
+                return res.status(400).json({ 
+                    message: 'Para filtrar por disponibilidade, forneça as datas de check-in (availableFrom) e check-out (availableTo).' 
+                });
+            }
+
             // Converte as strings de data para objetos Date
             const checkinDate = new Date(availableFrom);
             const checkoutDate = new Date(availableTo);
-            const requiredCapacity = parseInt(capacity, 10);
+            const requiredCapacity = capacity ? parseInt(capacity, 10) : 1; // Capacidade padrão = 1
 
             // Validações básicas antes de chamar o service
-            if (isNaN(checkinDate.getTime()) || isNaN(checkoutDate.getTime()) || isNaN(requiredCapacity) || requiredCapacity <= 0) {
-                 return res.status(400).json({ message: 'Parâmetros de data ou capacidade inválidos.' });
+            if (isNaN(checkinDate.getTime()) || isNaN(checkoutDate.getTime())) {
+                 return res.status(400).json({ message: 'Parâmetros de data inválidos.' });
+            }
+            if (capacity && (isNaN(requiredCapacity) || requiredCapacity <= 0)) {
+                return res.status(400).json({ message: 'Capacidade deve ser um número inteiro positivo.' });
             }
              if (checkoutDate <= checkinDate) {
-                 return res.status(400).json({ message: 'Data final deve ser posterior à data inicial.' });
+                 return res.status(400).json({ message: 'Data de check-out deve ser posterior à data de check-in.' });
             }
 
             rooms = await roomService.findAvailableRooms(checkinDate, checkoutDate, requiredCapacity);

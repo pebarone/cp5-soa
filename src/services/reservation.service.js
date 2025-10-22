@@ -109,6 +109,7 @@ class ReservationService {
             checkinExpected: reservationData.checkinExpected,
             checkoutExpected: reservationData.checkoutExpected,
             status: Reservation.STATUS.CREATED, //
+            pricePerNightAtBooking: room.pricePerNight, // Preserva o preço do quarto no momento da reserva
             estimatedAmount: estimatedAmount
         };
 
@@ -188,9 +189,9 @@ class ReservationService {
         // Recalcula o valor estimado se não foi fornecido
         let finalEstimatedAmount = estimatedAmount;
         if (finalEstimatedAmount === null) {
-            const room = await roomRepository.findById(reservation.roomId);
+            // IMPORTANTE: Usa o preço fixado no momento da reserva, não o preço atual do quarto
             const nights = calculateNights(checkinDate, checkoutDate);
-            finalEstimatedAmount = nights * room.pricePerNight;
+            finalEstimatedAmount = nights * reservation.pricePerNightAtBooking;
         }
 
         // Atualiza a reserva (passa strings)
@@ -280,18 +281,11 @@ class ReservationService {
 
         const checkoutTime = new Date(); // Timestamp atual
 
-        // Busca o quarto para pegar o preço da diária
-        const room = await roomRepository.findById(reservation.roomId);
-        if (!room) {
-             // Caso raro onde o quarto foi deletado após a reserva ser feita (deveria ser impedido pela FK ou status INATIVO)
-             throw new NotFoundError(`Quarto associado à reserva (ID: ${reservation.roomId}) não foi encontrado.`);
-        }
-
         // Calcula o número de diárias efetivas
         const actualNights = calculateNights(reservation.checkinAt, checkoutTime);
 
-        // Calcula valor final
-        const finalAmount = actualNights * room.pricePerNight;
+        // IMPORTANTE: Usa o preço fixado no momento da reserva, não o preço atual do quarto
+        const finalAmount = actualNights * reservation.pricePerNightAtBooking;
 
         const updatedReservation = await reservationRepository.updateStatus(
             id,

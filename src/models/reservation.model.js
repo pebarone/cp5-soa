@@ -12,6 +12,7 @@ class Reservation {
      * @param {Date} checkinExpected - Data prevista para check-in[cite: 19, 127].
      * @param {Date} checkoutExpected - Data prevista para check-out[cite: 19, 129].
      * @param {string} status - Status da reserva[cite: 19, 134, 137].
+     * @param {number} pricePerNightAtBooking - Preço da diária no momento da reserva.
      * @param {Date | null} [checkinAt] - Timestamp do check-in efetivo (opcional)[cite: 131].
      * @param {Date | null} [checkoutAt] - Timestamp do check-out efetivo (opcional)[cite: 133].
      * @param {number | null} [estimatedAmount] - Valor estimado (opcional)[cite: 19, 138].
@@ -26,6 +27,7 @@ class Reservation {
         checkinExpected,
         checkoutExpected,
         status,
+        pricePerNightAtBooking,
         checkinAt = null,
         checkoutAt = null,
         estimatedAmount = null,
@@ -39,6 +41,7 @@ class Reservation {
         this.checkinExpected = checkinExpected;
         this.checkoutExpected = checkoutExpected;
         this.status = status;
+        this.pricePerNightAtBooking = pricePerNightAtBooking;
         this.checkinAt = checkinAt;
         this.checkoutAt = checkoutAt;
         this.estimatedAmount = estimatedAmount;

@@ -73,18 +73,19 @@ COMMENT ON COLUMN RESERVAS_ROOMS.status IS 'Status do quarto (ATIVO, INATIVO).';
 
 -- Tabela de Reservas
 CREATE TABLE RESERVAS_RESERVATIONS (
-    id                VARCHAR2(36) NOT NULL,
-    guest_id          VARCHAR2(36) NOT NULL,
-    room_id           VARCHAR2(36) NOT NULL,
-    checkin_expected  DATE NOT NULL,
-    checkout_expected DATE NOT NULL,
-    checkin_at        TIMESTAMP,
-    checkout_at       TIMESTAMP,
-    status            VARCHAR2(20) NOT NULL,
-    estimated_amount  NUMBER(10,2),
-    final_amount      NUMBER(10,2),
-    created_at        TIMESTAMP DEFAULT SYSTIMESTAMP,
-    updated_at        TIMESTAMP,
+    id                      VARCHAR2(36) NOT NULL,
+    guest_id                VARCHAR2(36) NOT NULL,
+    room_id                 VARCHAR2(36) NOT NULL,
+    checkin_expected        DATE NOT NULL,
+    checkout_expected       DATE NOT NULL,
+    checkin_at              TIMESTAMP,
+    checkout_at             TIMESTAMP,
+    status                  VARCHAR2(20) NOT NULL,
+    price_per_night_at_booking NUMBER(10,2) NOT NULL,
+    estimated_amount        NUMBER(10,2),
+    final_amount            NUMBER(10,2),
+    created_at              TIMESTAMP DEFAULT SYSTIMESTAMP,
+    updated_at              TIMESTAMP,
     CONSTRAINT pk_reservas_reservations PRIMARY KEY (id),
     CONSTRAINT fk_reservas_reservations_guest FOREIGN KEY (guest_id) REFERENCES RESERVAS_GUESTS(id),
     CONSTRAINT fk_reservas_reservations_room FOREIGN KEY (room_id) REFERENCES RESERVAS_ROOMS(id),
@@ -99,6 +100,7 @@ COMMENT ON COLUMN RESERVAS_RESERVATIONS.checkout_expected IS 'Data prevista para
 COMMENT ON COLUMN RESERVAS_RESERVATIONS.checkin_at IS 'Timestamp do check-in efetivo.';
 COMMENT ON COLUMN RESERVAS_RESERVATIONS.checkout_at IS 'Timestamp do check-out efetivo.';
 COMMENT ON COLUMN RESERVAS_RESERVATIONS.status IS 'Status atual da reserva (CREATED, CHECKED_IN, CHECKED_OUT, CANCELED).';
+COMMENT ON COLUMN RESERVAS_RESERVATIONS.price_per_night_at_booking IS 'Preço da diária no momento da reserva. Valor fixo que não muda mesmo se o preço do quarto for atualizado.';
 COMMENT ON COLUMN RESERVAS_RESERVATIONS.estimated_amount IS 'Valor estimado da reserva no momento da criação.';
 COMMENT ON COLUMN RESERVAS_RESERVATIONS.final_amount IS 'Valor final calculado no check-out.';
 COMMENT ON COLUMN RESERVAS_RESERVATIONS.created_at IS 'Timestamp de quando a reserva foi criada.';
