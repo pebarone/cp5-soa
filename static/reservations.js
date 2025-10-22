@@ -18,6 +18,21 @@ const STATUS_LABELS = {
     'CANCELED': 'Cancelada'
 };
 
+/**
+ * Parseia uma string de data no formato YYYY-MM-DD para um objeto Date em timezone local.
+ * Evita problemas de conversão UTC que podem resultar no dia anterior.
+ * @param {string} dateString - String no formato YYYY-MM-DD ou ISO
+ * @returns {Date|null} Objeto Date ou null se inválido
+ */
+function parseLocalDate(dateString) {
+    if (!dateString) return null;
+    // Extrai apenas a parte da data se for ISO completo
+    const datePart = dateString.split('T')[0];
+    const [year, month, day] = datePart.split('-').map(Number);
+    // Cria Date em timezone local (mês é 0-indexed)
+    return new Date(year, month - 1, day);
+}
+
 export function renderReservationsPage() {
     const content = `
         <div class="page-header">
@@ -242,8 +257,8 @@ function getStatusColor(status) {
 }
 
 function formatDate(dateString) {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
+    if (!date) return '-';
     return date.toLocaleDateString('pt-BR');
 }
 
@@ -434,11 +449,14 @@ window.viewReservation = async function(id) {
 };
 
 function calculateNights(checkin, checkout) {
-    const start = new Date(checkin);
-    const end = new Date(checkout);
-    const diffTime = Math.abs(end - start);
+    const start = parseLocalDate(checkin);
+    const end = parseLocalDate(checkout);
+    
+    if (!start || !end) return 1;
+    
+    const diffTime = end - start;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.max(1, diffDays); // Mínimo de 1 diária
 }
 
 function calculateTotal(reservation) {

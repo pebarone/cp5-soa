@@ -47,9 +47,9 @@ class ReservationResponseDTO {
         this.id = reservationModel.id;
         this.guestId = reservationModel.guestId;
         this.roomId = reservationModel.roomId;
-        // Formata as datas para o padrão YYYY-MM-DD para consistência na resposta
-        this.checkinExpected = reservationModel.checkinExpected?.toISOString().split('T')[0];
-        this.checkoutExpected = reservationModel.checkoutExpected?.toISOString().split('T')[0];
+        // As datas já vêm como string YYYY-MM-DD do repository
+        this.checkinExpected = reservationModel.checkinExpected;
+        this.checkoutExpected = reservationModel.checkoutExpected;
         this.status = reservationModel.status;
         this.checkinAt = reservationModel.checkinAt; // Pode ser null, retorna como está (ISO string)
         this.checkoutAt = reservationModel.checkoutAt; // Pode ser null, retorna como está (ISO string)

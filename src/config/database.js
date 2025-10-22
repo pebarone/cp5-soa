@@ -52,6 +52,10 @@ async function execute(sql, binds = [], options = {}) {
   let connection;
   try {
     connection = await pool.getConnection();
+    
+    // Configura o timezone da sessão para America/Sao_Paulo (GMT-3)
+    await connection.execute(`ALTER SESSION SET TIME_ZONE = 'America/Sao_Paulo'`);
+    
     const result = await connection.execute(sql, binds, { autoCommit: true, ...options });
     return result;
   } catch (err) {

@@ -5,6 +5,7 @@ const guestRepository = require('../repositories/guest.repository');
 const { v4: uuidv4 } = require('uuid');
 const Reservation = require('../models/reservation.model');
 const Room = require('../models/room.model');
+const { parseDateString } = require('../utils/dateUtils');
 
 // --- Reutilizando Erros Customizados (definidos em guest.service.js ou em um arquivo utils/errors.js) ---
 class ConflictError extends Error { constructor(message) { super(message); this.name = 'ConflictError'; this.statusCode = 409; } }
@@ -16,7 +17,7 @@ class UnprocessableEntityError extends Error { constructor(message) { super(mess
 
 // Helper para calcular diferença de dias (considerando diária mínima de 1)
 function calculateNights(checkinDate, checkoutDate) {
-    if (!(checkinDate instanceof Date) || !(checkoutDate instanceof Date) || isNaN(checkinDate) || isNaN(checkoutDate)) {
+    if (!(checkinDate instanceof Date) || !(checkoutDate instanceof Date) || isNaN(checkinDate.getTime()) || isNaN(checkoutDate.getTime())) {
         return 0; // Retorna 0 se as datas forem inválidas
     }
     // Zera a hora para comparar apenas dias inteiros
@@ -40,10 +41,10 @@ class ReservationService {
     _validateReservationData(reservationData) {
         if (!reservationData.guestId) throw new ValidationError('ID do Hóspede é obrigatório.');
         if (!reservationData.roomId) throw new ValidationError('ID do Quarto é obrigatório.');
-        if (!reservationData.checkinExpected || !(reservationData.checkinExpected instanceof Date) || isNaN(reservationData.checkinExpected)) {
+        if (!reservationData.checkinExpected || !(reservationData.checkinExpected instanceof Date) || isNaN(reservationData.checkinExpected.getTime())) {
             throw new ValidationError('Data de Check-in Prevista inválida.');
         }
-        if (!reservationData.checkoutExpected || !(reservationData.checkoutExpected instanceof Date) || isNaN(reservationData.checkoutExpected)) {
+        if (!reservationData.checkoutExpected || !(reservationData.checkoutExpected instanceof Date) || isNaN(reservationData.checkoutExpected.getTime())) {
             throw new ValidationError('Data de Check-out Prevista inválida.');
         }
 
@@ -144,8 +145,8 @@ class ReservationService {
      * Atualiza os detalhes de uma reserva (datas previstas).
      * Só permite atualização se a reserva ainda não teve check-in.
      * @param {string} id - ID da reserva.
-     * @param {Date} checkinExpected - Nova data de check-in prevista.
-     * @param {Date} checkoutExpected - Nova data de check-out prevista.
+     * @param {string} checkinExpected - Nova data de check-in (YYYY-MM-DD).
+     * @param {string} checkoutExpected - Nova data de check-out (YYYY-MM-DD).
      * @param {number|null} estimatedAmount - Valor estimado (opcional, será recalculado se null).
      * @returns {Promise<Reservation>} A reserva atualizada.
      * @throws {NotFoundError} Se não encontrada.
@@ -159,16 +160,20 @@ class ReservationService {
             throw new ConflictError(`Não é possível atualizar uma reserva com status '${reservation.status}'. Atualização permitida apenas para status '${Reservation.STATUS.CREATED}'.`);
         }
 
+        // Converte strings para Date para validação
+        const checkinDate = parseDateString(checkinExpected);
+        const checkoutDate = parseDateString(checkoutExpected);
+
         // Valida as novas datas
         const reservationData = {
             guestId: reservation.guestId,
             roomId: reservation.roomId,
-            checkinExpected,
-            checkoutExpected
+            checkinExpected: checkinDate,
+            checkoutExpected: checkoutDate
         };
         this._validateReservationData(reservationData);
 
-        // Verifica disponibilidade do quarto nas novas datas
+        // Verifica disponibilidade do quarto nas novas datas (passa strings)
         const conflictingReservations = await reservationRepository.findConflictingReservations(
             reservation.roomId,
             checkinExpected,
@@ -184,11 +189,11 @@ class ReservationService {
         let finalEstimatedAmount = estimatedAmount;
         if (finalEstimatedAmount === null) {
             const room = await roomRepository.findById(reservation.roomId);
-            const nights = calculateNights(checkinExpected, checkoutExpected);
+            const nights = calculateNights(checkinDate, checkoutDate);
             finalEstimatedAmount = nights * room.pricePerNight;
         }
 
-        // Atualiza a reserva
+        // Atualiza a reserva (passa strings)
         const updatedReservation = await reservationRepository.updateDetails(
             id,
             checkinExpected,

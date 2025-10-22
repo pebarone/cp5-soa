@@ -34,6 +34,23 @@ function parseDateString(dateString) {
     return date;
 }
 
+/**
+ * Formata uma data para o padrão YYYY-MM-DD usando o timezone local.
+ * @param {Date | null | undefined} date - O objeto Date.
+ * @returns {string | null} A string no formato YYYY-MM-DD ou null.
+ */
+function formatDateToString(date) {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+        return null;
+    }
+    
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
 
 /**
  * Calcula o número de diárias entre duas datas.
@@ -44,7 +61,7 @@ function parseDateString(dateString) {
  * @returns {number} O número de diárias (mínimo 1) ou 0 se as datas forem inválidas/invertidas.
  */
 function calculateNights(checkinDate, checkoutDate) {
-    if (!(checkinDate instanceof Date) || !(checkoutDate instanceof Date) || isNaN(checkinDate) || isNaN(checkoutDate)) {
+    if (!(checkinDate instanceof Date) || !(checkoutDate instanceof Date) || isNaN(checkinDate.getTime()) || isNaN(checkoutDate.getTime())) {
         return 0; // Retorna 0 se as datas forem inválidas
     }
 
@@ -71,5 +88,6 @@ function calculateNights(checkinDate, checkoutDate) {
 
 module.exports = {
     parseDateString,
+    formatDateToString,
     calculateNights
 };

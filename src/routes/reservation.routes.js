@@ -64,16 +64,25 @@ const router = express.Router();
 const createReservationValidationRules = [
     body('guestId').isUUID(4).withMessage('ID de Hóspede inválido (UUID v4).'),
     body('roomId').isUUID(4).withMessage('ID de Quarto inválido (UUID v4).'),
-    body('checkinExpected').isISO8601().toDate().withMessage('Data de check-in prevista inválida (YYYY-MM-DD).'),
-    body('checkoutExpected').isISO8601().toDate().withMessage('Data de check-out prevista inválida (YYYY-MM-DD).')
-        // Validação customizada para garantir checkout > checkin (após conversão)
+    body('checkinExpected')
+        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-in prevista deve estar no formato YYYY-MM-DD.')
+        .custom((value) => {
+            const date = new Date(value + 'T00:00:00'); // Força timezone local
+            if (isNaN(date.getTime())) {
+                throw new Error('Data de check-in prevista inválida.');
+            }
+            return true;
+        }),
+    body('checkoutExpected')
+        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-out prevista deve estar no formato YYYY-MM-DD.')
         .custom((value, { req }) => {
+            const checkoutDate = new Date(value + 'T00:00:00');
+            if (isNaN(checkoutDate.getTime())) {
+                throw new Error('Data de check-out prevista inválida.');
+            }
+            
             if (req.body.checkinExpected) {
-                const checkinDate = new Date(req.body.checkinExpected);
-                const checkoutDate = new Date(value);
-                 // Compara apenas a data, ignorando a hora
-                 checkinDate.setUTCHours(0, 0, 0, 0);
-                 checkoutDate.setUTCHours(0, 0, 0, 0);
+                const checkinDate = new Date(req.body.checkinExpected + 'T00:00:00');
                 if (checkoutDate <= checkinDate) {
                     throw new Error('Data de check-out prevista deve ser posterior à data de check-in prevista.');
                 }
@@ -84,14 +93,25 @@ const createReservationValidationRules = [
 ];
 
 const updateReservationValidationRules = [ // Apenas datas podem ser atualizadas
-    body('checkinExpected').isISO8601().toDate().withMessage('Data de check-in prevista inválida (YYYY-MM-DD).'),
-    body('checkoutExpected').isISO8601().toDate().withMessage('Data de check-out prevista inválida (YYYY-MM-DD).')
+    body('checkinExpected')
+        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-in prevista deve estar no formato YYYY-MM-DD.')
+        .custom((value) => {
+            const date = new Date(value + 'T00:00:00');
+            if (isNaN(date.getTime())) {
+                throw new Error('Data de check-in prevista inválida.');
+            }
+            return true;
+        }),
+    body('checkoutExpected')
+        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-out prevista deve estar no formato YYYY-MM-DD.')
         .custom((value, { req }) => {
+            const checkoutDate = new Date(value + 'T00:00:00');
+            if (isNaN(checkoutDate.getTime())) {
+                throw new Error('Data de check-out prevista inválida.');
+            }
+            
             if (req.body.checkinExpected) {
-                 const checkinDate = new Date(req.body.checkinExpected);
-                 const checkoutDate = new Date(value);
-                 checkinDate.setUTCHours(0, 0, 0, 0);
-                 checkoutDate.setUTCHours(0, 0, 0, 0);
+                const checkinDate = new Date(req.body.checkinExpected + 'T00:00:00');
                 if (checkoutDate <= checkinDate) {
                     throw new Error('Data de check-out prevista deve ser posterior à data de check-in prevista.');
                 }

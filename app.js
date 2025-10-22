@@ -1,5 +1,9 @@
 // app.js - Ponto de entrada da aplicação
 require('dotenv').config(); // Carrega variáveis de ambiente do arquivo .env
+
+// Configura o timezone para GMT-3 (America/Sao_Paulo)
+process.env.TZ = 'America/Sao_Paulo';
+
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');

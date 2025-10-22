@@ -15,17 +15,13 @@ class ReservationController {
     create = catchAsync(async (req, res, next) => {
         const requestData = new CreateReservationRequestDTO(req.body);
 
-        // Após o middleware de validação, os campos podem já ser Date (por causa de .toDate()).
-        // Aceitamos Date diretamente; caso seja string, fazemos o parse.
-        const checkinExpectedDate = (req.body.checkinExpected instanceof Date)
-            ? req.body.checkinExpected
-            : parseDateString(requestData.checkinExpected);
-        const checkoutExpectedDate = (req.body.checkoutExpected instanceof Date)
-            ? req.body.checkoutExpected
-            : parseDateString(requestData.checkoutExpected);
+        // As datas vêm como string YYYY-MM-DD do frontend
+        // Fazemos o parse para Date usando a função utilitária
+        const checkinExpectedDate = parseDateString(requestData.checkinExpected);
+        const checkoutExpectedDate = parseDateString(requestData.checkoutExpected);
 
-        if (!(checkinExpectedDate instanceof Date) || isNaN(checkinExpectedDate) ||
-            !(checkoutExpectedDate instanceof Date) || isNaN(checkoutExpectedDate)) {
+        // Validação (não deve acontecer se o middleware de validação funcionou)
+        if (!checkinExpectedDate || !checkoutExpectedDate) {
              return res.status(400).json({ message: 'Formato de data inválido. Use YYYY-MM-DD.' });
         }
 
@@ -99,29 +95,21 @@ class ReservationController {
         const id = req.params.id;
         const requestData = new UpdateReservationRequestDTO(req.body);
 
-        const checkinExpectedDate = (req.body.checkinExpected instanceof Date)
-            ? req.body.checkinExpected
-            : parseDateString(requestData.checkinExpected);
-        const checkoutExpectedDate = (req.body.checkoutExpected instanceof Date)
-            ? req.body.checkoutExpected
-            : parseDateString(requestData.checkoutExpected);
+        // As datas vêm como string YYYY-MM-DD do frontend
+        const checkinExpectedDate = parseDateString(requestData.checkinExpected);
+        const checkoutExpectedDate = parseDateString(requestData.checkoutExpected);
 
-        if (!(checkinExpectedDate instanceof Date) || isNaN(checkinExpectedDate) ||
-            !(checkoutExpectedDate instanceof Date) || isNaN(checkoutExpectedDate)) {
-            return res.status(400).json({ message: 'Formato de data inválido. Use YYYY-MM-DD.' });
+        // Validação (não deve acontecer se o middleware de validação funcionou)
+        if (!checkinExpectedDate || !checkoutExpectedDate) {
+             return res.status(400).json({ message: 'Formato de data inválido. Use YYYY-MM-DD.' });
         }
-         // Validação de datas (checkout > checkin) acontece no service
-         // Calcula novo valor estimado (opcional, pode ser feito no service)
-         // const room = await roomRepository.findById(reservation.roomId); // Precisaria buscar a reserva primeiro
-         // const nights = calculateNights(checkinExpectedDate, checkoutExpectedDate);
-         // const estimatedAmount = nights * room.pricePerNight;
 
-        // Simplificação: Deixar o service recalcular o valor estimado se necessário
+        // Validação de datas (checkout > checkin) acontece no service
         const updatedReservation = await reservationService.updateDetails(
             id,
             checkinExpectedDate,
             checkoutExpectedDate,
-            null // Deixa o service recalcular ou ignora por enquanto
+            null // Deixa o service recalcular
         );
 
         const reservationResponse = new ReservationResponseDTO(updatedReservation);

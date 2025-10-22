@@ -179,7 +179,7 @@ class RoomService {
      * @throws {ValidationError} Se as datas ou capacidade forem inválidas.
      */
     async findAvailableRooms(checkinDate, checkoutDate, requiredCapacity) {
-        if (!(checkinDate instanceof Date) || isNaN(checkinDate) || !(checkoutDate instanceof Date) || isNaN(checkoutDate)) {
+        if (!(checkinDate instanceof Date) || isNaN(checkinDate.getTime()) || !(checkoutDate instanceof Date) || isNaN(checkoutDate.getTime())) {
             throw new ValidationError('Datas de check-in e check-out inválidas.');
         }
         if (checkoutDate <= checkinDate) {

@@ -30,7 +30,7 @@ class RoomController {
             const requiredCapacity = parseInt(capacity, 10);
 
             // Validações básicas antes de chamar o service
-            if (isNaN(checkinDate) || isNaN(checkoutDate) || isNaN(requiredCapacity) || requiredCapacity <= 0) {
+            if (isNaN(checkinDate.getTime()) || isNaN(checkoutDate.getTime()) || isNaN(requiredCapacity) || requiredCapacity <= 0) {
                  return res.status(400).json({ message: 'Parâmetros de data ou capacidade inválidos.' });
             }
              if (checkoutDate <= checkinDate) {
