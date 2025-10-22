@@ -87,7 +87,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Guest'
+              $ref: '#/components/schemas/UpdateGuest'
       responses:
         '200':
           description: Hóspede atualizado com sucesso
@@ -122,7 +122,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Room'
+              $ref: '#/components/schemas/NewRoom'
       responses:
         '201':
           description: Quarto criado com sucesso
@@ -198,7 +198,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Room'
+              $ref: '#/components/schemas/UpdateRoom'
       responses:
         '200':
           description: Quarto atualizado com sucesso
@@ -246,13 +246,13 @@ paths:
     post:
       tags:
         - Reservations
-      summary: Cria uma nova reserva
+      summary: Cria um nova reserva
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reservation'
+              $ref: '#/components/schemas/NewReservation'
       responses:
         '201':
           description: Reserva criada com sucesso
@@ -323,7 +323,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reservation'
+              $ref: '#/components/schemas/UpdateReservation'
       responses:
         '200':
           description: Reserva atualizada com sucesso
@@ -411,12 +411,17 @@ components:
         phone:
           type: string
           description: O telefone do hóspede.
+        createdAt:
+          type: string
+          format: date-time
+          description: A data de criação do hóspede.
       example:
         id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
         fullName: "John Doe"
         document: "12345678900"
         email: "john.doe@example.com"
         phone: "11987654321"
+        createdAt: "2024-01-01T10:00:00Z"
     NewGuest:
       type: object
       required:
@@ -442,6 +447,24 @@ components:
         document: "09876543211"
         email: "jane.doe@example.com"
         phone: "11912345678"
+    UpdateGuest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          description: O nome completo do hóspede.
+        document:
+          type: string
+          description: O documento do hóspede.
+        email:
+          type: string
+          format: email
+          description: O email do hóspede.
+        phone:
+          type: string
+          description: O telefone do hóspede.
+      example:
+        email: "new.jane.doe@example.com"
     Room:
       type: object
       required:
@@ -460,7 +483,7 @@ components:
         type:
           type: string
           description: O tipo do quarto.
-          enum: [Solteiro, Casal, Família, Presidencial]
+          enum: [STANDARD, DELUXE, SUITE]
         capacity:
           type: integer
           description: A capacidade do quarto.
@@ -471,14 +494,67 @@ components:
         status:
           type: string
           description: O status do quarto.
-          enum: [Disponível, Ocupado, Manutenção, Inativo]
+          enum: [ATIVO, INATIVO]
       example:
         id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
         number: 101
-        type: "Casal"
+        type: "DELUXE"
         capacity: 2
-        pricePerNight: 150.50
-        status: "Disponível"
+        pricePerNight: 350.50
+        status: "ATIVO"
+    NewRoom:
+      type: object
+      required:
+        - number
+        - type
+        - capacity
+        - pricePerNight
+      properties:
+        number:
+          type: integer
+          description: O número do quarto.
+        type:
+          type: string
+          description: O tipo do quarto.
+          enum: [STANDARD, DELUXE, SUITE]
+        capacity:
+          type: integer
+          description: A capacidade do quarto.
+        pricePerNight:
+          type: number
+          format: float
+          description: O preço por noite.
+        status:
+          type: string
+          description: O status do quarto.
+          enum: [ATIVO, INATIVO]
+      example:
+        number: 102
+        type: "STANDARD"
+        capacity: 1
+        pricePerNight: 150.00
+        status: "ATIVO"
+    UpdateRoom:
+      type: object
+      properties:
+        type:
+          type: string
+          description: O tipo do quarto.
+          enum: [STANDARD, DELUXE, SUITE]
+        capacity:
+          type: integer
+          description: A capacidade do quarto.
+        pricePerNight:
+          type: number
+          format: float
+          description: O preço por noite.
+        status:
+          type: string
+          description: O status do quarto.
+          enum: [ATIVO, INATIVO]
+      example:
+        pricePerNight: 400.00
+        status: "INATIVO"
     Reservation:
       type: object
       required:
@@ -504,6 +580,7 @@ components:
           format: date
         status:
           type: string
+          enum: [CREATED, CHECKED_IN, CHECKED_OUT, CANCELED]
         pricePerNightAtBooking:
           type: number
           format: float
@@ -525,3 +602,57 @@ components:
         updatedAt:
           type: string
           format: date-time
+        guest:
+          $ref: '#/components/schemas/Guest'
+        room:
+          $ref: '#/components/schemas/Room'
+      example:
+        id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        guestId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        roomId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        checkinExpected: "2024-12-20"
+        checkoutExpected: "2024-12-25"
+        status: "CREATED"
+        pricePerNightAtBooking: 350.50
+        estimatedAmount: 1752.50
+        createdAt: "2024-10-22T14:00:00Z"
+    NewReservation:
+      type: object
+      required:
+        - guestId
+        - roomId
+        - checkinExpected
+        - checkoutExpected
+      properties:
+        guestId:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        checkinExpected:
+          type: string
+          format: date
+        checkoutExpected:
+          type: string
+          format: date
+      example:
+        guestId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        roomId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        checkinExpected: "2024-12-20"
+        checkoutExpected: "2024-12-25"
+    UpdateReservation:
+      type: object
+      required:
+        - checkinExpected
+        - checkoutExpected
+      properties:
+        checkinExpected:
+          type: string
+          format: date
+        checkoutExpected:
+          type: string
+          format: date
+      example:
+        checkinExpected: "2024-12-21"
+        checkoutExpected: "2024-12-26"
