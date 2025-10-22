@@ -31,7 +31,14 @@ describe('RoomRepository', () => {
 
             expect(execute).toHaveBeenCalledWith(
                 expect.any(String),
-                expect.objectContaining(roomData),
+                expect.objectContaining({
+                    id: roomData.id,
+                    room_number: roomData.number,
+                    type: roomData.type,
+                    capacity: roomData.capacity,
+                    price_per_night: roomData.pricePerNight,
+                    status: roomData.status
+                }),
                 { autoCommit: true }
             );
             expect(result).toBeInstanceOf(Room);
@@ -53,7 +60,7 @@ describe('RoomRepository', () => {
 
             const result = await roomRepository.findById('test-uuid');
 
-            expect(execute).toHaveBeenCalledWith(expect.any(String), ['test-uuid']);
+            expect(execute).toHaveBeenCalledWith(expect.any(String), { id: 'test-uuid' });
             expect(result).toBeInstanceOf(Room);
             expect(result.id).toBe(mockRoomRow.ID);
         });
@@ -111,7 +118,13 @@ describe('RoomRepository', () => {
 
             expect(execute).toHaveBeenCalledWith(
                 expect.stringContaining('UPDATE'),
-                expect.objectContaining({ id: 'test-uuid', ...roomData }),
+                expect.objectContaining({
+                    id: 'test-uuid',
+                    type: roomData.type,
+                    capacity: roomData.capacity,
+                    price_per_night: roomData.pricePerNight,
+                    status: roomData.status
+                }),
                 { autoCommit: true }
             );
             expect(result).toBeInstanceOf(Room);
@@ -133,7 +146,7 @@ describe('RoomRepository', () => {
 
             const result = await roomRepository.delete('test-uuid');
 
-            expect(execute).toHaveBeenCalledWith(expect.stringContaining('DELETE'), ['test-uuid'], { autoCommit: true });
+            expect(execute).toHaveBeenCalledWith(expect.stringContaining('DELETE'), { id: 'test-uuid' }, { autoCommit: true });
             expect(result).toBe(1);
         });
     });
@@ -146,7 +159,7 @@ describe('RoomRepository', () => {
 
             expect(execute).toHaveBeenCalledWith(
                 expect.stringContaining('UPDATE RESERVAS_ROOMS SET status'),
-                { newStatus: Room.STATUS.INATIVO, id: 'test-uuid' },
+                { new_status: Room.STATUS.INATIVO, id: 'test-uuid' },
                 { autoCommit: true }
             );
             expect(result).toBe(1);

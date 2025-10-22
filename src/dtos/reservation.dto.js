@@ -40,8 +40,10 @@ class UpdateReservationRequestDTO {
 class ReservationResponseDTO {
     /**
      * @param {Reservation} reservationModel - A instância do modelo Reservation.
+     * @param {object} guest - Opcional: dados do hóspede para popular
+     * @param {object} room - Opcional: dados do quarto para popular
      */
-    constructor(reservationModel) {
+    constructor(reservationModel, guest = null, room = null) {
         this.id = reservationModel.id;
         this.guestId = reservationModel.guestId;
         this.roomId = reservationModel.roomId;
@@ -55,6 +57,28 @@ class ReservationResponseDTO {
         this.finalAmount = reservationModel.finalAmount; // Pode ser null
         this.createdAt = reservationModel.createdAt;
         this.updatedAt = reservationModel.updatedAt; // Pode ser null
+        
+        // Adiciona dados populados se fornecidos
+        if (guest) {
+            this.guest = {
+                id: guest.id,
+                fullName: guest.fullName,
+                document: guest.document,
+                email: guest.email,
+                phone: guest.phone
+            };
+        }
+        
+        if (room) {
+            this.room = {
+                id: room.id,
+                number: room.number,
+                type: room.type,
+                capacity: room.capacity,
+                pricePerNight: room.pricePerNight,
+                status: room.status
+            };
+        }
     }
 }
 

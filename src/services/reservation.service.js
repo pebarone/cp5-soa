@@ -126,7 +126,18 @@ class ReservationService {
         if (!reservation) {
             throw new NotFoundError('Reserva não encontrada.');
         }
-        return reservation;
+        
+        // Popular dados de guest e room
+        const [guest, room] = await Promise.all([
+            guestRepository.findById(reservation.guestId),
+            roomRepository.findById(reservation.roomId)
+        ]);
+        
+        return {
+            ...reservation,
+            guest,
+            room
+        };
     }
 
     /**
@@ -162,7 +173,6 @@ class ReservationService {
             reservation.roomId,
             checkinExpected,
             checkoutExpected,
-            [Reservation.STATUS.CREATED, Reservation.STATUS.CHECKED_IN],
             id // Exclui a própria reserva da verificação
         );
 
@@ -298,6 +308,29 @@ class ReservationService {
          // Valida se o quarto existe primeiro
         await roomRepository.findById(roomId); // Lança NotFoundError se não existir
         return await reservationRepository.findByRoomId(roomId);
+    }
+
+    async findAll() {
+        const reservations = await reservationRepository.findAll();
+        
+        // Popular dados de guest e room para cada reserva
+        const populatedReservations = await Promise.all(
+            reservations.map(async (reservation) => {
+                const [guest, room] = await Promise.all([
+                    guestRepository.findById(reservation.guestId),
+                    roomRepository.findById(reservation.roomId)
+                ]);
+                
+                // Adiciona os objetos guest e room à reserva
+                return {
+                    ...reservation,
+                    guest,
+                    room
+                };
+            })
+        );
+        
+        return populatedReservations;
     }
 }
 

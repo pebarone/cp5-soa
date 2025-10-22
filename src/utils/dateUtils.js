@@ -1,10 +1,10 @@
 // src/utils/dateUtils.js
 
 /**
- * Converte uma string no formato 'YYYY-MM-DD' para um objeto Date em UTC.
+ * Converte uma string no formato 'YYYY-MM-DD' para um objeto Date em horário local.
  * Retorna null se o formato for inválido ou a data inexistente.
  * @param {string | null | undefined} dateString - A string de data.
- * @returns {Date | null} O objeto Date correspondente em UTC ou null.
+ * @returns {Date | null} O objeto Date correspondente ou null.
  */
 function parseDateString(dateString) {
     if (!dateString) return null;
@@ -13,27 +13,23 @@ function parseDateString(dateString) {
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(dateString)) return null;
 
-    // Cria a data adicionando 'T00:00:00Z' para interpretar como UTC
-    // Isso evita problemas com fuso horário local que podem mudar o dia.
-    const date = new Date(dateString + 'T00:00:00Z');
+    // Extrai ano, mês e dia da string
+    const [year, month, day] = dateString.split('-').map(Number);
+    
+    // Cria a data em horário local (sem timezone)
+    // Mês é 0-indexed no JavaScript, então subtraímos 1
+    const date = new Date(year, month - 1, day);
 
-    // Verifica se a data criada é válida e corresponde ao input
-    // (new Date('invalid-string') não lança erro, mas retorna Invalid Date)
+    // Verifica se a data criada é válida
     if (isNaN(date.getTime())) {
-        return null; // Data inválida (ex: '2023-02-30')
+        return null; // Data inválida
     }
 
-     // Extra confirmação: Reformatar a data UTC para YYYY-MM-DD e comparar com a string original
-     // Isso pega casos como '2023-02-29' que podem ser válidos se interpretados localmente
-     // mas não necessariamente correspondem à intenção UTC do YYYY-MM-DD puro.
-     const year = date.getUTCFullYear();
-     const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-     const day = date.getUTCDate().toString().padStart(2, '0');
-     if (`${year}-${month}-${day}` !== dateString) {
-         //console.warn(`Data string '${dateString}' resultou em data UTC inválida ou diferente.`);
-         return null; // A data criada não corresponde exatamente ao input (ex: dia inválido)
-     }
-
+    // Verifica se a data criada corresponde aos valores fornecidos
+    // (protege contra datas como 2023-02-30 que seriam convertidas para 2023-03-02)
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+        return null;
+    }
 
     return date;
 }

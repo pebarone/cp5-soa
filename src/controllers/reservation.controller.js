@@ -46,7 +46,7 @@ class ReservationController {
     findById = catchAsync(async (req, res, next) => {
         const id = req.params.id;
         const reservation = await reservationService.getReservationById(id);
-        const reservationResponse = new ReservationResponseDTO(reservation);
+        const reservationResponse = new ReservationResponseDTO(reservation, reservation.guest, reservation.room);
         res.status(200).json(reservationResponse); // 200 OK
     });
 
@@ -62,9 +62,11 @@ class ReservationController {
         } else {
              // CUIDADO: buscar todas as reservas pode ser pesado. Implementar paginação.
              // Por ora, limitamos ou buscamos todas (conforme definido no service)
-             reservations = await reservationRepository.findAll(); // Usando repo diretamente (ou criar método no service)
+             reservations = await reservationService.findAll(); // Usando service
         }
-        const reservationsResponse = reservations.map(r => new ReservationResponseDTO(r));
+        const reservationsResponse = reservations.map(r => 
+            new ReservationResponseDTO(r, r.guest, r.room)
+        );
         res.status(200).json(reservationsResponse);
     });
 
@@ -127,8 +129,5 @@ class ReservationController {
     });
 
 }
-// Instância do reservationRepository necessária para o findAll simplificado
-const reservationRepository = require('../repositories/reservation.repository');
-// const roomRepository = require('../repositories/room.repository'); // Necessário se calcular valor no controller
 
 module.exports = new ReservationController();

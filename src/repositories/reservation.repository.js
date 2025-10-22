@@ -72,7 +72,11 @@ class ReservationRepository {
      * @returns {Promise<Reservation[]>} Lista de reservas.
      */
     async findAll() {
-        const sql = `SELECT * FROM RESERVAS_RESERVATIONS ORDER BY created_at DESC`;
+        const sql = `SELECT id, guest_id, room_id, checkin_expected, checkout_expected, 
+                            status, checkin_at, checkout_at, estimated_amount, final_amount, 
+                            created_at, updated_at 
+                     FROM RESERVAS_RESERVATIONS 
+                     ORDER BY created_at DESC`;
         const result = await execute(sql);
         return result.rows.map(mapReservationRowToModel);
     }
@@ -110,7 +114,7 @@ class ReservationRepository {
     async findConflictingReservations(roomId, checkinDate, checkoutDate, excludeReservationId = null) {
         let sql = `SELECT * FROM RESERVAS_RESERVATIONS
                    WHERE room_id = :room_id
-                     AND status IN (:status_created, :status_checked_in)
+                     AND (status = :status_created OR status = :status_checked_in)
                      AND checkin_expected < :checkout_date
                      AND checkout_expected > :checkin_date`;
 
