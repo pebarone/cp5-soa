@@ -1,0 +1,527 @@
+openapi: 3.0.0
+info:
+  title: Hotel Reservation API
+  description: API para gerenciamento de reservas de hotel, hóspedes e quartos.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desenvolvimento
+tags:
+  - name: Guests
+    description: Operações relacionadas a hóspedes
+  - name: Rooms
+    description: Operações relacionadas a quartos
+  - name: Reservations
+    description: Operações relacionadas a reservas
+
+paths:
+  /guests:
+    post:
+      tags:
+        - Guests
+      summary: Cria um novo hóspede
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGuest'
+      responses:
+        '201':
+          description: Hóspede criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Guest'
+        '422':
+          description: Erro de validação
+    get:
+      tags:
+        - Guests
+      summary: Retorna a lista de todos os hóspedes
+      responses:
+        '200':
+          description: A lista de hóspedes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Guest'
+  /guests/{id}:
+    get:
+      tags:
+        - Guests
+      summary: Retorna um hóspede pelo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID do hóspede
+      responses:
+        '200':
+          description: O hóspede encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Guest'
+        '404':
+          description: Hóspede não encontrado
+    put:
+      tags:
+        - Guests
+      summary: Atualiza um hóspede pelo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID do hóspede
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Guest'
+      responses:
+        '200':
+          description: Hóspede atualizado com sucesso
+        '404':
+          description: Hóspede não encontrado
+        '422':
+          description: Erro de validação
+    delete:
+      tags:
+        - Guests
+      summary: Deleta um hóspede pelo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID do hóspede
+      responses:
+        '204':
+          description: Hóspede deletado com sucesso
+        '404':
+          description: Hóspede não encontrado
+  /rooms:
+    post:
+      tags:
+        - Rooms
+      summary: Cria um novo quarto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Room'
+      responses:
+        '201':
+          description: Quarto criado com sucesso
+        '422':
+          description: Erro de validação
+    get:
+      tags:
+        - Rooms
+      summary: Retorna a lista de todos os quartos ou quartos disponíveis
+      parameters:
+        - in: query
+          name: availableFrom
+          schema:
+            type: string
+            format: date
+          description: Data de início da disponibilidade
+        - in: query
+          name: availableTo
+          schema:
+            type: string
+            format: date
+          description: Data de fim da disponibilidade
+        - in: query
+          name: capacity
+          schema:
+            type: integer
+          description: Capacidade do quarto
+      responses:
+        '200':
+          description: A lista de quartos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'
+  /rooms/{id}:
+    get:
+      tags:
+        - Rooms
+      summary: Retorna um quarto pelo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID do quarto
+      responses:
+        '200':
+          description: O quarto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Quarto não encontrado
+    put:
+      tags:
+        - Rooms
+      summary: Atualiza um quarto pelo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID do quarto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Room'
+      responses:
+        '200':
+          description: Quarto atualizado com sucesso
+        '404':
+          description: Quarto não encontrado
+        '422':
+          description: Erro de validação
+  /rooms/{id}/deactivate:
+    patch:
+      tags:
+        - Rooms
+      summary: Desativa um quarto
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID do quarto
+      responses:
+        '200':
+          description: Quarto desativado com sucesso
+        '404':
+          description: Quarto não encontrado
+  /rooms/{id}/activate:
+    patch:
+      tags:
+        - Rooms
+      summary: Reativa um quarto
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID do quarto
+      responses:
+        '200':
+          description: Quarto reativado com sucesso
+        '404':
+          description: Quarto não encontrado
+  /reservations:
+    post:
+      tags:
+        - Reservations
+      summary: Cria uma nova reserva
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        '201':
+          description: Reserva criada com sucesso
+        '422':
+          description: Erro de validação
+    get:
+      tags:
+        - Reservations
+      summary: Retorna a lista de todas as reservas
+      parameters:
+        - in: query
+          name: guestId
+          schema:
+            type: string
+            format: uuid
+          description: O ID do hóspede
+        - in: query
+          name: roomId
+          schema:
+            type: string
+            format: uuid
+          description: O ID do quarto
+      responses:
+        '200':
+          description: A lista de reservas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reservation'
+  /reservations/{id}:
+    get:
+      tags:
+        - Reservations
+      summary: Retorna uma reserva pelo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID da reserva
+      responses:
+        '200':
+          description: A reserva encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '404':
+          description: Reserva não encontrada
+    put:
+      tags:
+        - Reservations
+      summary: Atualiza uma reserva pelo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID da reserva
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        '200':
+          description: Reserva atualizada com sucesso
+        '404':
+          description: Reserva não encontrada
+        '422':
+          description: Erro de validação
+  /reservations/{id}/cancel:
+    patch:
+      tags:
+        - Reservations
+      summary: Cancela uma reserva
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID da reserva
+      responses:
+        '200':
+          description: Reserva cancelada com sucesso
+        '404':
+          description: Reserva não encontrada
+  /reservations/{id}/check-in:
+    patch:
+      tags:
+        - Reservations
+      summary: Faz o check-in de uma reserva
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID da reserva
+      responses:
+        '200':
+          description: Check-in realizado com sucesso
+        '404':
+          description: Reserva não encontrada
+  /reservations/{id}/check-out:
+    patch:
+      tags:
+        - Reservations
+      summary: Faz o check-out de uma reserva
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: O ID da reserva
+      responses:
+        '200':
+          description: Check-out realizado com sucesso
+        '404':
+          description: Reserva não encontrada
+
+components:
+  schemas:
+    Guest:
+      type: object
+      required:
+        - fullName
+        - document
+        - email
+      properties:
+        id:
+          type: string
+          description: O ID do hóspede.
+        fullName:
+          type: string
+          description: O nome completo do hóspede.
+        document:
+          type: string
+          description: O documento do hóspede.
+        email:
+          type: string
+          format: email
+          description: O email do hóspede.
+        phone:
+          type: string
+          description: O telefone do hóspede.
+      example:
+        id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        fullName: "John Doe"
+        document: "12345678900"
+        email: "john.doe@example.com"
+        phone: "11987654321"
+    NewGuest:
+      type: object
+      required:
+        - fullName
+        - document
+        - email
+      properties:
+        fullName:
+          type: string
+          description: O nome completo do hóspede.
+        document:
+          type: string
+          description: O documento do hóspede.
+        email:
+          type: string
+          format: email
+          description: O email do hóspede.
+        phone:
+          type: string
+          description: O telefone do hóspede.
+      example:
+        fullName: "Jane Doe"
+        document: "09876543211"
+        email: "jane.doe@example.com"
+        phone: "11912345678"
+    Room:
+      type: object
+      required:
+        - number
+        - type
+        - capacity
+        - pricePerNight
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: O ID do quarto.
+        number:
+          type: integer
+          description: O número do quarto.
+        type:
+          type: string
+          description: O tipo do quarto.
+          enum: [Solteiro, Casal, Família, Presidencial]
+        capacity:
+          type: integer
+          description: A capacidade do quarto.
+        pricePerNight:
+          type: number
+          format: float
+          description: O preço por noite.
+        status:
+          type: string
+          description: O status do quarto.
+          enum: [Disponível, Ocupado, Manutenção, Inativo]
+      example:
+        id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        number: 101
+        type: "Casal"
+        capacity: 2
+        pricePerNight: 150.50
+        status: "Disponível"
+    Reservation:
+      type: object
+      required:
+        - guestId
+        - roomId
+        - checkinExpected
+        - checkoutExpected
+      properties:
+        id:
+          type: string
+          format: uuid
+        guestId:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        checkinExpected:
+          type: string
+          format: date
+        checkoutExpected:
+          type: string
+          format: date
+        status:
+          type: string
+        pricePerNightAtBooking:
+          type: number
+          format: float
+        checkinAt:
+          type: string
+          format: date-time
+        checkoutAt:
+          type: string
+          format: date-time
+        estimatedAmount:
+          type: number
+          format: float
+        finalAmount:
+          type: number
+          format: float
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

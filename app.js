@@ -6,22 +6,10 @@ process.env.TZ = 'America/Sao_Paulo';
 
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
-const swaggerJSDoc = require('swagger-jsdoc');
+const YAML = require('yamljs');
 const path = require('path');
 
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'API de Reserva de Hotel',
-      version: '1.0.0',
-      description: 'Documentação da API de Reserva de Hotel',
-    },
-  },
-  apis: ['./src/routes/*.js'], // Caminho para os arquivos de rotas
-};
-
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
+const swaggerDocument = YAML.load(path.join(__dirname, './src/config/swagger.yaml'));
 
 // const rateLimit = require('express-rate-limit'); // Descomentar se quiser usar rate limiting
 
@@ -46,7 +34,7 @@ database.startup()
 
         // --- Rota da Documentação Swagger ---
         // Servir a UI do Swagger no endpoint /api-docs
-        app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+        app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
         // --- Rota Principal da API ---
         // Monta todas as rotas definidas em src/routes/index.js sob o prefixo /api

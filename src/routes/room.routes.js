@@ -7,49 +7,6 @@ const { RoomRequestDTO } = require('../dtos/room.dto');
 
 const router = express.Router();
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Room:
- *       type: object
- *       required:
- *         - number
- *         - type
- *         - capacity
- *         - pricePerNight
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: O ID do quarto.
- *         number:
- *           type: integer
- *           description: O número do quarto.
- *         type:
- *           type: string
- *           description: O tipo do quarto.
- *           enum: [Solteiro, Casal, Família, Presidencial]
- *         capacity:
- *           type: integer
- *           description: A capacidade do quarto.
- *         pricePerNight:
- *           type: number
- *           format: float
- *           description: O preço por noite.
- *         status:
- *           type: string
- *           description: O status do quarto.
- *           enum: [Disponível, Ocupado, Manutenção, Inativo]
- *       example:
- *         id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
- *         number: 101
- *         type: "Casal"
- *         capacity: 2
- *         pricePerNight: 150.50
- *         status: "Disponível"
- */
-
 // --- Regras de Validação ---
 const idParamValidationRule = [
     param('id').isUUID(4).withMessage('ID de Quarto inválido (deve ser UUID v4).')
@@ -57,24 +14,6 @@ const idParamValidationRule = [
 
 // --- Rotas ---
 
-/**
- * @swagger
- * /api/rooms:
- *   post:
- *     summary: Cria um novo quarto.
- *     tags: [Rooms]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Room'
- *     responses:
- *       201:
- *         description: Quarto criado com sucesso.
- *       422:
- *         description: Erro de validação.
- */
 router.post(
     '/',
     RoomRequestDTO.validate(),
@@ -82,40 +21,6 @@ router.post(
     roomController.create
 );
 
-/**
- * @swagger
- * /api/rooms:
- *   get:
- *     summary: Retorna a lista de todos os quartos ou quartos disponíveis.
- *     tags: [Rooms]
- *     parameters:
- *       - in: query
- *         name: availableFrom
- *         schema:
- *           type: string
- *           format: date
- *         description: Data de início da disponibilidade.
- *       - in: query
- *         name: availableTo
- *         schema:
- *           type: string
- *           format: date
- *         description: Data de fim da disponibilidade.
- *       - in: query
- *         name: capacity
- *         schema:
- *           type: integer
- *         description: Capacidade do quarto.
- *     responses:
- *       200:
- *         description: A lista de quartos.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Room'
- */
 router.get(
     '/',
     // Aplica validação de query params SE eles existirem
@@ -133,30 +38,6 @@ router.get(
 );
 
 
-/**
- * @swagger
- * /api/rooms/{id}:
- *   get:
- *     summary: Retorna um quarto pelo ID.
- *     tags: [Rooms]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *           format: uuid
- *         required: true
- *         description: O ID do quarto.
- *     responses:
- *       200:
- *         description: O quarto encontrado.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Room'
- *       404:
- *         description: Quarto não encontrado.
- */
 router.get(
     '/:id',
     idParamValidationRule,
@@ -164,34 +45,6 @@ router.get(
     roomController.findById
 );
 
-/**
- * @swagger
- * /api/rooms/{id}:
- *   put:
- *     summary: Atualiza um quarto pelo ID.
- *     tags: [Rooms]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *           format: uuid
- *         required: true
- *         description: O ID do quarto.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Room'
- *     responses:
- *       200:
- *         description: Quarto atualizado com sucesso.
- *       404:
- *         description: Quarto não encontrado.
- *       422:
- *         description: Erro de validação.
- */
 router.put(
     '/:id',
     idParamValidationRule,
@@ -200,26 +53,6 @@ router.put(
     roomController.update
 );
 
-/**
- * @swagger
- * /api/rooms/{id}/deactivate:
- *   patch:
- *     summary: Desativa um quarto.
- *     tags: [Rooms]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *           format: uuid
- *         required: true
- *         description: O ID do quarto.
- *     responses:
- *       200:
- *         description: Quarto desativado com sucesso.
- *       404:
- *         description: Quarto não encontrado.
- */
 router.patch(
     '/:id/deactivate',
     idParamValidationRule,
@@ -227,26 +60,6 @@ router.patch(
     roomController.deactivate
 );
 
-/**
- * @swagger
- * /api/rooms/{id}/activate:
- *   patch:
- *     summary: Reativa um quarto.
- *     tags: [Rooms]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *           format: uuid
- *         required: true
- *         description: O ID do quarto.
- *     responses:
- *       200:
- *         description: Quarto reativado com sucesso.
- *       404:
- *         description: Quarto não encontrado.
- */
 router.patch(
     '/:id/activate',
     idParamValidationRule,
