@@ -1,9 +1,9 @@
 // src/routes/room.routes.js
 const express = require('express');
-const { body, param, query } = require('express-validator');
+const { param } = require('express-validator');
 const roomController = require('../controllers/room.controller');
 const validate = require('../middlewares/validation.middleware');
-const Room = require('../models/room.model'); // Para constantes
+const { RoomRequestDTO } = require('../dtos/room.dto');
 
 const router = express.Router();
 
@@ -51,30 +51,8 @@ const router = express.Router();
  */
 
 // --- Regras de Validação ---
-const roomCreateValidationRules = [
-    body('number').isInt({ gt: 0 }).withMessage('Número do quarto deve ser um inteiro positivo.'),
-    body('type').isIn(Object.values(Room.TYPES)).withMessage(`Tipo inválido. Válidos: ${Object.values(Room.TYPES).join(', ')}.`),
-    body('capacity').isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.'),
-    body('pricePerNight').isFloat({ gt: -0.01 }).withMessage('Preço por noite deve ser um número não negativo.'),
-    body('status').optional().isIn(Object.values(Room.STATUS)).withMessage(`Status inválido. Válidos: ${Object.values(Room.STATUS).join(', ')}.`)
-];
-
-const roomUpdateValidationRules = [ // Similar, mas campos são opcionais
-    body('type').optional().isIn(Object.values(Room.TYPES)).withMessage(`Tipo inválido. Válidos: ${Object.values(Room.TYPES).join(', ')}.`),
-    body('capacity').optional().isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.'),
-    body('pricePerNight').optional().isFloat({ gt: -0.01 }).withMessage('Preço por noite deve ser um número não negativo.'),
-    body('status').optional().isIn(Object.values(Room.STATUS)).withMessage(`Status inválido. Válidos: ${Object.values(Room.STATUS).join(', ')}.`)
-    // Não permite atualizar 'number' via PUT
-];
-
 const idParamValidationRule = [
     param('id').isUUID(4).withMessage('ID de Quarto inválido (deve ser UUID v4).')
-];
-
-const availabilityQueryValidationRules = [
-    query('availableFrom').optional().isISO8601().toDate().withMessage('Data inicial inválida (formato YYYY-MM-DD).'),
-    query('availableTo').optional().isISO8601().toDate().withMessage('Data final inválida (formato YYYY-MM-DD).'),
-    query('capacity').optional().isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.')
 ];
 
 // --- Rotas ---
@@ -99,7 +77,7 @@ const availabilityQueryValidationRules = [
  */
 router.post(
     '/',
-    roomCreateValidationRules,
+    RoomRequestDTO.validate(),
     validate,
     roomController.create
 );
@@ -144,7 +122,7 @@ router.get(
     (req, res, next) => {
         if (req.query.availableFrom || req.query.availableTo || req.query.capacity) {
             // Executa a cadeia de validação de query
-            Promise.all(availabilityQueryValidationRules.map(validation => validation.run(req)))
+            Promise.all(RoomRequestDTO.validateAvailabilityQuery().map(validation => validation.run(req)))
                 .then(() => validate(req, res, next)) // Chama o middleware de validação
                 .catch(next); // Captura erros inesperados na validação
         } else {
@@ -217,7 +195,7 @@ router.get(
 router.put(
     '/:id',
     idParamValidationRule,
-    roomUpdateValidationRules,
+    RoomRequestDTO.validateUpdate(),
     validate,
     roomController.update
 );

@@ -1,5 +1,5 @@
 // Rooms Module
-import { roomsAPI } from './api.js';
+import { roomsAPI, getErrorMessage } from './api.js';
 import { showToast, showModal, closeModal, showLoading, hideLoading } from './app.js';
 
 const ROOM_TYPES = ['STANDARD', 'DELUXE', 'SUITE'];
@@ -73,7 +73,7 @@ async function loadRooms(filters = {}) {
         const rooms = await roomsAPI.getAll(filters);
         renderRoomsGrid(rooms);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
         renderRoomsGrid([]);
     }
 }
@@ -264,7 +264,7 @@ async function handleRoomSubmit(form, roomId = null) {
         closeModal();
         loadRooms();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -320,7 +320,7 @@ window.viewRoom = async function(id) {
         
         showModal('Detalhes do Quarto', modalContent);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -332,7 +332,7 @@ window.editRoom = async function(id) {
         const room = await roomsAPI.getById(id);
         openRoomModal(room);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -358,7 +358,7 @@ window.toggleRoomStatus = async function(id, action) {
         
         loadRooms();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }

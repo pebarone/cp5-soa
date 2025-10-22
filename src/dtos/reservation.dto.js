@@ -1,4 +1,5 @@
 // src/dtos/reservation.dto.js
+const { body, query } = require('express-validator');
 const Reservation = require('../models/reservation.model'); // Para constantes
 
 /**
@@ -17,6 +18,46 @@ class CreateReservationRequestDTO {
         // numberOfGuests é opcional, default para 1 no service
         // this.numberOfGuests = body.numberOfGuests || 1;
     }
+
+    /**
+     * Validações para criação de uma reserva.
+     */
+    static validate() {
+        return [
+            body('guestId').isUUID(4).withMessage('ID de Hóspede inválido (UUID v4).'),
+            body('roomId').isUUID(4).withMessage('ID de Quarto inválido (UUID v4).'),
+            body('checkinExpected')
+                .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-in prevista deve estar no formato YYYY-MM-DD.')
+                .custom((value) => {
+                    const date = new Date(value + 'T00:00:00'); // Força timezone local
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Data de check-in prevista inválida.');
+                    }
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (date < today) {
+                        throw new Error('A data de check-in não pode ser no passado.');
+                    }
+                    return true;
+                }),
+            body('checkoutExpected')
+                .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-out prevista deve estar no formato YYYY-MM-DD.')
+                .custom((value, { req }) => {
+                    const checkoutDate = new Date(value + 'T00:00:00');
+                    if (isNaN(checkoutDate.getTime())) {
+                        throw new Error('Data de check-out prevista inválida.');
+                    }
+                    
+                    if (req.body.checkinExpected) {
+                        const checkinDate = new Date(req.body.checkinExpected + 'T00:00:00');
+                        if (checkoutDate <= checkinDate) {
+                            throw new Error('Data de check-out prevista deve ser posterior à data de check-in prevista.');
+                        }
+                    }
+                    return true;
+                })
+        ];
+    }
 }
 
 /**
@@ -30,6 +71,54 @@ class UpdateReservationRequestDTO {
          // As datas virão como string da API, precisam ser convertidas para Date no controller/service
         this.checkinExpected = body.checkinExpected;   // string (formato 'YYYY-MM-DD'), obrigatório
         this.checkoutExpected = body.checkoutExpected; // string (formato 'YYYY-MM-DD'), obrigatório
+    }
+
+    /**
+     * Validações para atualização de uma reserva.
+     */
+    static validate() {
+        return [
+            body('checkinExpected')
+                .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-in prevista deve estar no formato YYYY-MM-DD.')
+                .custom((value) => {
+                    const date = new Date(value + 'T00:00:00');
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Data de check-in prevista inválida.');
+                    }
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (date < today) {
+                        throw new Error('A data de check-in não pode ser no passado.');
+                    }
+                    return true;
+                }),
+            body('checkoutExpected')
+                .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-out prevista deve estar no formato YYYY-MM-DD.')
+                .custom((value, { req }) => {
+                    const checkoutDate = new Date(value + 'T00:00:00');
+                    if (isNaN(checkoutDate.getTime())) {
+                        throw new Error('Data de check-out prevista inválida.');
+                    }
+                    
+                    if (req.body.checkinExpected) {
+                        const checkinDate = new Date(req.body.checkinExpected + 'T00:00:00');
+                        if (checkoutDate <= checkinDate) {
+                            throw new Error('Data de check-out prevista deve ser posterior à data de check-in prevista.');
+                        }
+                    }
+                    return true;
+                })
+        ];
+    }
+
+    /**
+     * Validações para query params de filtros de reserva.
+     */
+    static validateQueryFilters() {
+        return [
+            query('guestId').optional().isUUID(4).withMessage('ID de Hóspede inválido (UUID v4).'),
+            query('roomId').optional().isUUID(4).withMessage('ID de Quarto inválido (UUID v4).')
+        ];
     }
 }
 

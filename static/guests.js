@@ -1,5 +1,5 @@
 // Guests Module
-import { guestsAPI } from './api.js';
+import { guestsAPI, getErrorMessage } from './api.js';
 import { showToast, showModal, closeModal, showLoading, hideLoading } from './app.js';
 
 export function renderGuestsPage() {
@@ -56,7 +56,7 @@ async function loadGuests() {
         const guests = await guestsAPI.getAll();
         renderGuestsTable(guests);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
         renderGuestsTable([]);
     }
 }
@@ -85,7 +85,7 @@ function renderGuestsTable(guests) {
     tbody.innerHTML = guests.map(guest => `
         <tr>
             <td><strong>${guest.fullName}</strong></td>
-            <td>${guest.document}</td>
+            <td>${formatDocument(guest.document)}</td>
             <td>${guest.email}</td>
             <td>${guest.phone || '-'}</td>
             <td class="text-right">
@@ -114,9 +114,127 @@ function renderGuestsTable(guests) {
     `).join('');
 }
 
+/**
+ * Formata CPF: 000.000.000-00
+ */
+function formatCPF(value) {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+        return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
+    return value;
+}
+
+/**
+ * Formata CNPJ: 00.000.000/0000-00
+ */
+function formatCNPJ(value) {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 14) {
+        return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+    return value;
+}
+
+/**
+ * Formata CPF ou CNPJ automaticamente
+ */
+function formatDocument(value) {
+    const numbers = value.replace(/\D/g, '');
+    
+    if (numbers.length <= 11) {
+        // CPF
+        return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+        // CNPJ
+        return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+}
+
+/**
+ * Valida CPF
+ */
+function isValidCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+        sum += parseInt(cpf.charAt(i)) * (10 - i);
+    }
+    let digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(cpf.charAt(9))) return false;
+    
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+        sum += parseInt(cpf.charAt(i)) * (11 - i);
+    }
+    digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(cpf.charAt(10))) return false;
+    
+    return true;
+}
+
+/**
+ * Valida CNPJ
+ */
+function isValidCNPJ(cnpj) {
+    cnpj = cnpj.replace(/\D/g, '');
+    if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
+    
+    let length = cnpj.length - 2;
+    let numbers = cnpj.substring(0, length);
+    const digits = cnpj.substring(length);
+    let sum = 0;
+    let pos = length - 7;
+    
+    for (let i = length; i >= 1; i--) {
+        sum += parseInt(numbers.charAt(length - i)) * pos--;
+        if (pos < 2) pos = 9;
+    }
+    
+    let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (result !== parseInt(digits.charAt(0))) return false;
+    
+    length = length + 1;
+    numbers = cnpj.substring(0, length);
+    sum = 0;
+    pos = length - 7;
+    
+    for (let i = length; i >= 1; i--) {
+        sum += parseInt(numbers.charAt(length - i)) * pos--;
+        if (pos < 2) pos = 9;
+    }
+    
+    result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (result !== parseInt(digits.charAt(1))) return false;
+    
+    return true;
+}
+
+/**
+ * Valida CPF ou CNPJ
+ */
+function validateDocument(value) {
+    const numbers = value.replace(/\D/g, '');
+    
+    if (numbers.length === 11) {
+        return isValidCPF(numbers);
+    } else if (numbers.length === 14) {
+        return isValidCNPJ(numbers);
+    }
+    
+    return false;
+}
+
 function openGuestModal(guest = null) {
     const isEdit = !!guest;
     const title = isEdit ? 'Editar Hóspede' : 'Novo Hóspede';
+    
+    // Formata o documento se existir (para exibição)
+    const formattedDocument = guest?.document ? formatDocument(guest.document) : '';
     
     const modalContent = `
         <form id="guest-form" class="form">
@@ -127,8 +245,9 @@ function openGuestModal(guest = null) {
             
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label required">Documento</label>
-                    <input type="text" class="form-input" name="document" value="${guest?.document || ''}" required>
+                    <label class="form-label required">Documento (CPF ou CNPJ)</label>
+                    <input type="text" class="form-input" id="document-input" name="document" value="${formattedDocument}" required placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
+                    <small class="form-hint" style="display: block; margin-top: 0.25rem; color: var(--color-text-muted); font-size: 0.875rem;">Digite apenas números, a formatação será aplicada automaticamente</small>
                 </div>
                 
                 <div class="form-group">
@@ -151,9 +270,28 @@ function openGuestModal(guest = null) {
 
     showModal(title, modalContent);
 
+    // Adiciona formatação automática ao campo de documento
+    const documentInput = document.getElementById('document-input');
+    documentInput.addEventListener('input', (e) => {
+        const cursorPos = e.target.selectionStart;
+        const oldLength = e.target.value.length;
+        e.target.value = formatDocument(e.target.value);
+        const newLength = e.target.value.length;
+        const diff = newLength - oldLength;
+        e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
+    });
+
     document.getElementById('cancel-btn').addEventListener('click', closeModal);
     document.getElementById('guest-form').addEventListener('submit', (e) => {
         e.preventDefault();
+        
+        // Valida o documento antes de enviar
+        const documentValue = documentInput.value;
+        if (!validateDocument(documentValue)) {
+            showToast('CPF ou CNPJ inválido. Verifique o documento digitado.', 'error');
+            return;
+        }
+        
         handleGuestSubmit(e.target, guest?.id);
     });
 }
@@ -181,7 +319,7 @@ async function handleGuestSubmit(form, guestId = null) {
         closeModal();
         loadGuests();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -202,7 +340,7 @@ window.viewGuest = async function(id) {
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Documento</label>
-                        <p>${guest.document}</p>
+                        <p>${formatDocument(guest.document)}</p>
                     </div>
                     
                     <div class="form-group">
@@ -230,7 +368,7 @@ window.viewGuest = async function(id) {
         
         showModal('Detalhes do Hóspede', modalContent);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -242,7 +380,7 @@ window.editGuest = async function(id) {
         const guest = await guestsAPI.getById(id);
         openGuestModal(guest);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -259,7 +397,7 @@ window.deleteGuest = async function(id) {
         showToast('Hóspede excluído com sucesso!', 'success');
         loadGuests();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }

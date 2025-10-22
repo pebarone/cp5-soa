@@ -1,4 +1,5 @@
 // src/dtos/room.dto.js
+const { body, query } = require('express-validator');
 const Room = require('../models/room.model'); // Para constantes
 
 /**
@@ -14,6 +15,42 @@ class RoomRequestDTO {
         this.capacity = body.capacity;       // number, obrigatório
         this.pricePerNight = body.pricePerNight; // number, obrigatório
         this.status = body.status;           // string ('ATIVO', 'INATIVO'), opcional (default 'ATIVO')
+    }
+
+    /**
+     * Validações para criação de um quarto.
+     */
+    static validate() {
+        return [
+            body('number').isInt({ gt: 0 }).withMessage('Número do quarto deve ser um inteiro positivo.'),
+            body('type').isIn(Object.values(Room.TYPES)).withMessage(`Tipo inválido. Válidos: ${Object.values(Room.TYPES).join(', ')}.`),
+            body('capacity').isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.'),
+            body('pricePerNight').isFloat({ gt: -0.01 }).withMessage('Preço por noite deve ser um número não negativo.'),
+            body('status').optional().isIn(Object.values(Room.STATUS)).withMessage(`Status inválido. Válidos: ${Object.values(Room.STATUS).join(', ')}.`)
+        ];
+    }
+
+    /**
+     * Validações para atualização de um quarto (campos opcionais).
+     */
+    static validateUpdate() {
+        return [
+            body('type').optional().isIn(Object.values(Room.TYPES)).withMessage(`Tipo inválido. Válidos: ${Object.values(Room.TYPES).join(', ')}.`),
+            body('capacity').optional().isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.'),
+            body('pricePerNight').optional().isFloat({ gt: -0.01 }).withMessage('Preço por noite deve ser um número não negativo.'),
+            body('status').optional().isIn(Object.values(Room.STATUS)).withMessage(`Status inválido. Válidos: ${Object.values(Room.STATUS).join(', ')}.`)
+        ];
+    }
+
+    /**
+     * Validações para query params de disponibilidade.
+     */
+    static validateAvailabilityQuery() {
+        return [
+            query('availableFrom').optional().isISO8601().toDate().withMessage('Data inicial inválida (formato YYYY-MM-DD).'),
+            query('availableTo').optional().isISO8601().toDate().withMessage('Data final inválida (formato YYYY-MM-DD).'),
+            query('capacity').optional().isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.')
+        ];
     }
 }
 

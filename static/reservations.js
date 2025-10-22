@@ -1,5 +1,5 @@
 // Reservations Module
-import { reservationsAPI, guestsAPI, roomsAPI } from './api.js';
+import { reservationsAPI, guestsAPI, roomsAPI, getErrorMessage } from './api.js';
 import { showToast, showModal, closeModal, showLoading, hideLoading } from './app.js';
 
 // Status que correspondem ao backend
@@ -144,7 +144,7 @@ async function loadReservations(filters = {}) {
         const reservations = await reservationsAPI.getAll(filters);
         renderReservationsTable(reservations);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
         renderReservationsTable([]);
     }
 }
@@ -358,7 +358,7 @@ async function openReservationModal(reservation = null) {
             handleReservationSubmit(e.target, reservation?.id);
         });
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -390,7 +390,7 @@ async function handleReservationSubmit(form, reservationId = null) {
         closeModal();
         loadReservations();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -468,7 +468,7 @@ window.viewReservation = async function(id) {
         
         showModal('Detalhes da Reserva', modalContent);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -497,7 +497,7 @@ window.editReservation = async function(id) {
         const reservation = await reservationsAPI.getById(id);
         await openReservationModal(reservation);
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -514,7 +514,7 @@ window.cancelReservation = async function(id) {
         showToast('Reserva cancelada com sucesso!', 'success');
         loadReservations();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -531,7 +531,7 @@ window.performCheckIn = async function(id) {
         showToast('Check-in realizado com sucesso!', 'success');
         loadReservations();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }
@@ -548,7 +548,7 @@ window.performCheckOut = async function(id) {
         showToast('Check-out realizado com sucesso!', 'success');
         loadReservations();
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast(getErrorMessage(error), 'error');
     } finally {
         hideLoading();
     }

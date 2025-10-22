@@ -45,6 +45,24 @@ class API {
         }
     }
 
+    /**
+     * Extrai mensagens de erro específicas da resposta da API.
+     * Se houver erros de validação (array errors), retorna as mensagens específicas.
+     * Caso contrário, retorna a mensagem genérica.
+     * @param {object} error - Objeto de erro da API
+     * @returns {string} Mensagem de erro formatada
+     */
+    static getErrorMessage(error) {
+        // Se houver erros de validação específicos
+        if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+            // Retorna todas as mensagens de erro dos campos, separadas por quebra de linha
+            return error.errors.map(err => err.message).join('\n');
+        }
+        
+        // Caso contrário, retorna a mensagem genérica
+        return error.message || 'Erro desconhecido';
+    }
+
     // Generic CRUD methods
     async get(endpoint) {
         return this.request(endpoint, { method: 'GET' });
@@ -186,3 +204,6 @@ class ReservationsAPI extends API {
 export const guestsAPI = new GuestsAPI();
 export const roomsAPI = new RoomsAPI();
 export const reservationsAPI = new ReservationsAPI();
+
+// Export utility function
+export const getErrorMessage = API.getErrorMessage;

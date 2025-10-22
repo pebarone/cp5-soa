@@ -1,9 +1,9 @@
 // src/routes/guest.routes.js
 const express = require('express');
-const { param } = require('express-validator'); // Para validação
+const { param } = require('express-validator');
 const guestController = require('../controllers/guest.controller');
-const validate = require('../middlewares/validation.middleware'); // Middleware de validação
-const { GuestRequestDTO } = require('../dtos/guest.dto'); // Importa o DTO
+const validate = require('../middlewares/validation.middleware');
+const { GuestRequestDTO } = require('../dtos/guest.dto');
 
 const router = express.Router();
 

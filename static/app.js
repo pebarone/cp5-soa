@@ -76,13 +76,20 @@ export function showToast(message, type = 'info') {
         toast.classList.add(type);
     }
     
-    toast.textContent = message;
+    // Handle multi-line messages (for validation errors)
+    if (message.includes('\n')) {
+        // Convert newlines to <br> for HTML rendering
+        toast.innerHTML = message.replace(/\n/g, '<br>');
+    } else {
+        toast.textContent = message;
+    }
+    
     toast.classList.add('show');
     
-    // Auto hide after 3 seconds
+    // Auto hide after 4 seconds (increased for longer messages)
     setTimeout(() => {
         toast.classList.remove('show');
-    }, 3000);
+    }, 4000);
 }
 
 // Modal Management

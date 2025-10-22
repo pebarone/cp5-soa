@@ -1,73 +1,13 @@
 // src/routes/reservation.routes.js
 const express = require('express');
-const { body, param, query } = require('express-validator');
+const { param } = require('express-validator');
 const reservationController = require('../controllers/reservation.controller');
 const validate = require('../middlewares/validation.middleware');
-const Reservation = require('../models/reservation.model'); // Para constantes
+const { CreateReservationRequestDTO, UpdateReservationRequestDTO } = require('../dtos/reservation.dto');
 
 const router = express.Router();
 
 // --- Regras de Validação ---
-const createReservationValidationRules = [
-    body('guestId').isUUID(4).withMessage('ID de Hóspede inválido (UUID v4).'),
-    body('roomId').isUUID(4).withMessage('ID de Quarto inválido (UUID v4).'),
-    body('checkinExpected')
-        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-in prevista deve estar no formato YYYY-MM-DD.')
-        .custom((value) => {
-            const date = new Date(value + 'T00:00:00'); // Força timezone local
-            if (isNaN(date.getTime())) {
-                throw new Error('Data de check-in prevista inválida.');
-            }
-            return true;
-        }),
-    body('checkoutExpected')
-        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-out prevista deve estar no formato YYYY-MM-DD.')
-        .custom((value, { req }) => {
-            const checkoutDate = new Date(value + 'T00:00:00');
-            if (isNaN(checkoutDate.getTime())) {
-                throw new Error('Data de check-out prevista inválida.');
-            }
-            
-            if (req.body.checkinExpected) {
-                const checkinDate = new Date(req.body.checkinExpected + 'T00:00:00');
-                if (checkoutDate <= checkinDate) {
-                    throw new Error('Data de check-out prevista deve ser posterior à data de check-in prevista.');
-                }
-            }
-            return true;
-        })
-    // body('numberOfGuests').optional().isInt({ gt: 0 }).withMessage('Número de hóspedes deve ser inteiro positivo.')
-];
-
-const updateReservationValidationRules = [ // Apenas datas podem ser atualizadas
-    body('checkinExpected')
-        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-in prevista deve estar no formato YYYY-MM-DD.')
-        .custom((value) => {
-            const date = new Date(value + 'T00:00:00');
-            if (isNaN(date.getTime())) {
-                throw new Error('Data de check-in prevista inválida.');
-            }
-            return true;
-        }),
-    body('checkoutExpected')
-        .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-out prevista deve estar no formato YYYY-MM-DD.')
-        .custom((value, { req }) => {
-            const checkoutDate = new Date(value + 'T00:00:00');
-            if (isNaN(checkoutDate.getTime())) {
-                throw new Error('Data de check-out prevista inválida.');
-            }
-            
-            if (req.body.checkinExpected) {
-                const checkinDate = new Date(req.body.checkinExpected + 'T00:00:00');
-                if (checkoutDate <= checkinDate) {
-                    throw new Error('Data de check-out prevista deve ser posterior à data de check-in prevista.');
-                }
-            }
-            return true;
-        })
-];
-
-
 const idParamValidationRule = [
     param('id').isUUID(4).withMessage('ID de Reserva inválido (deve ser UUID v4).')
 ];
@@ -94,7 +34,7 @@ const idParamValidationRule = [
  */
 router.post(
     '/',
-    createReservationValidationRules,
+    CreateReservationRequestDTO.validate(),
     validate,
     reservationController.create
 );
@@ -131,9 +71,7 @@ router.post(
 router.get(
     '/',
     [ // Validações opcionais de query params
-        query('guestId').optional().isUUID(4).withMessage('ID de Hóspede inválido (UUID v4).'),
-        query('roomId').optional().isUUID(4).withMessage('ID de Quarto inválido (UUID v4).')
-        // Adicionar validação para status ou datas se implementar esses filtros
+        ...UpdateReservationRequestDTO.validateQueryFilters()
     ],
     validate, // Valida os query params se presentes
     reservationController.findAll
@@ -201,7 +139,7 @@ router.get(
 router.put(
     '/:id',
     idParamValidationRule,
-    updateReservationValidationRules,
+    UpdateReservationRequestDTO.validate(),
     validate,
     reservationController.updateDetails
 );
