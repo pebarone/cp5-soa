@@ -19,18 +19,44 @@ const STATUS_LABELS = {
 };
 
 /**
- * Parseia uma string de data no formato YYYY-MM-DD para um objeto Date em timezone local.
+ * Parseia uma entrada de data para um objeto Date em timezone local.
+ * Aceita string no formato YYYY-MM-DD (ou ISO) ou um objeto Date.
  * Evita problemas de conversão UTC que podem resultar no dia anterior.
- * @param {string} dateString - String no formato YYYY-MM-DD ou ISO
+ * @param {string | Date | null | undefined} dateInput - String ou Date
  * @returns {Date|null} Objeto Date ou null se inválido
  */
-function parseLocalDate(dateString) {
-    if (!dateString) return null;
+function parseLocalDate(dateInput) {
+    if (!dateInput) return null;
+    
+    // Se já for Date válido, normaliza para ano/mês/dia no timezone local
+    if (dateInput instanceof Date) {
+        if (isNaN(dateInput.getTime())) return null;
+        return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
+    }
+    
+    // Garante que vamos operar apenas sobre strings
+    if (typeof dateInput !== 'string') return null;
+    
     // Extrai apenas a parte da data se for ISO completo
-    const datePart = dateString.split('T')[0];
+    const datePart = dateInput.split('T')[0];
+    
+    // Valida formato YYYY-MM-DD
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(datePart)) return null;
+    
     const [year, month, day] = datePart.split('-').map(Number);
     // Cria Date em timezone local (mês é 0-indexed)
-    return new Date(year, month - 1, day);
+    const date = new Date(year, month - 1, day);
+    
+    // Valida se a data é válida
+    if (isNaN(date.getTime())) return null;
+    
+    // Valida se os valores correspondem (evita datas como 2023-02-30)
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+        return null;
+    }
+    
+    return date;
 }
 
 export function renderReservationsPage() {

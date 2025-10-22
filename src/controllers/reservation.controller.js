@@ -15,10 +15,16 @@ class ReservationController {
     create = catchAsync(async (req, res, next) => {
         const requestData = new CreateReservationRequestDTO(req.body);
 
+        console.log('[Controller] requestData.checkinExpected:', requestData.checkinExpected, 'Type:', typeof requestData.checkinExpected);
+        console.log('[Controller] requestData.checkoutExpected:', requestData.checkoutExpected, 'Type:', typeof requestData.checkoutExpected);
+
         // As datas vêm como string YYYY-MM-DD do frontend
         // Fazemos o parse para Date usando a função utilitária
         const checkinExpectedDate = parseDateString(requestData.checkinExpected);
         const checkoutExpectedDate = parseDateString(requestData.checkoutExpected);
+
+        console.log('[Controller] Parsed checkinExpectedDate:', checkinExpectedDate);
+        console.log('[Controller] Parsed checkoutExpectedDate:', checkoutExpectedDate);
 
         // Validação (não deve acontecer se o middleware de validação funcionou)
         if (!checkinExpectedDate || !checkoutExpectedDate) {
@@ -96,19 +102,11 @@ class ReservationController {
         const requestData = new UpdateReservationRequestDTO(req.body);
 
         // As datas vêm como string YYYY-MM-DD do frontend
-        const checkinExpectedDate = parseDateString(requestData.checkinExpected);
-        const checkoutExpectedDate = parseDateString(requestData.checkoutExpected);
-
-        // Validação (não deve acontecer se o middleware de validação funcionou)
-        if (!checkinExpectedDate || !checkoutExpectedDate) {
-             return res.status(400).json({ message: 'Formato de data inválido. Use YYYY-MM-DD.' });
-        }
-
-        // Validação de datas (checkout > checkin) acontece no service
+        // Passamos as strings diretamente para o service que fará o parse
         const updatedReservation = await reservationService.updateDetails(
             id,
-            checkinExpectedDate,
-            checkoutExpectedDate,
+            requestData.checkinExpected,
+            requestData.checkoutExpected,
             null // Deixa o service recalcular
         );
 

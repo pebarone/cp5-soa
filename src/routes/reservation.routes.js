@@ -7,59 +7,6 @@ const Reservation = require('../models/reservation.model'); // Para constantes
 
 const router = express.Router();
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Reservation:
- *       type: object
- *       required:
- *         - guestId
- *         - roomId
- *         - checkinExpected
- *         - checkoutExpected
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: O ID da reserva.
- *         guestId:
- *           type: string
- *           format: uuid
- *           description: O ID do hóspede.
- *         roomId:
- *           type: string
- *           format: uuid
- *           description: O ID do quarto.
- *         checkinExpected:
- *           type: string
- *           format: date
- *           description: A data de check-in esperada.
- *         checkoutExpected:
- *           type: string
- *           format: date
- *           description: A data de check-out esperada.
- *         checkinAt:
- *           type: string
- *           format: date-time
- *           description: A data e hora do check-in.
- *         checkoutAt:
- *           type: string
- *           format: date-time
- *           description: A data e hora do check-out.
- *         status:
- *           type: string
- *           description: O status da reserva.
- *           enum: [Pendente, Confirmada, Check-in, Check-out, Cancelada]
- *       example:
- *         id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
- *         guestId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
- *         roomId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
- *         checkinExpected: "2025-12-24"
- *         checkoutExpected: "2025-12-26"
- *         status: "Pendente"
- */
-
 // --- Regras de Validação ---
 const createReservationValidationRules = [
     body('guestId').isUUID(4).withMessage('ID de Hóspede inválido (UUID v4).'),

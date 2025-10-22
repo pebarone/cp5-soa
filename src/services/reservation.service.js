@@ -173,11 +173,11 @@ class ReservationService {
         };
         this._validateReservationData(reservationData);
 
-        // Verifica disponibilidade do quarto nas novas datas (passa strings)
+        // Verifica disponibilidade do quarto nas novas datas (usa objetos Date)
         const conflictingReservations = await reservationRepository.findConflictingReservations(
             reservation.roomId,
-            checkinExpected,
-            checkoutExpected,
+            checkinDate,
+            checkoutDate,
             id // Exclui a própria reserva da verificação
         );
 
@@ -241,7 +241,11 @@ class ReservationService {
 
         // Validação da Janela de Check-in
         const today = new Date(); today.setHours(0, 0, 0, 0); // Data atual sem hora
-        const checkinExpectedDate = new Date(reservation.checkinExpected.getFullYear(), reservation.checkinExpected.getMonth(), reservation.checkinExpected.getDate()); // Data prevista sem hora
+        // Converte a data prevista (vinda do repositório como string YYYY-MM-DD) para Date sem hora
+        const checkinExpectedDate = parseDateString(reservation.checkinExpected);
+        if (!checkinExpectedDate) {
+            throw new ValidationError('Data de Check-in Prevista inválida na reserva.');
+        }
 
         // Política padrão: Permitir check-in apenas no dia previsto
         if (today.getTime() !== checkinExpectedDate.getTime()) {

@@ -1,20 +1,38 @@
 // src/utils/dateUtils.js
 
 /**
- * Converte uma string no formato 'YYYY-MM-DD' para um objeto Date em horário local.
+ * Converte uma entrada de data para um objeto Date em horário local (apenas data).
+ * Aceita string no formato 'YYYY-MM-DD' (ou ISO com tempo) ou um objeto Date.
  * Retorna null se o formato for inválido ou a data inexistente.
- * @param {string | null | undefined} dateString - A string de data.
- * @returns {Date | null} O objeto Date correspondente ou null.
+ * @param {string | Date | null | undefined} dateInput - A data como string ou Date.
+ * @returns {Date | null} O objeto Date correspondente (yyyy-mm-dd no timezone local) ou null.
  */
-function parseDateString(dateString) {
-    if (!dateString) return null;
+function parseDateString(dateInput) {
+    console.log('[parseDateString] Input:', dateInput, 'Type:', typeof dateInput, 'Constructor:', dateInput?.constructor?.name);
+    
+    if (!dateInput) return null;
 
-    // Regex simples para validar o formato YYYY-MM-DD
+    // Se já for Date válido, normaliza para ano/mês/dia no timezone local
+    if (dateInput instanceof Date) {
+        if (isNaN(dateInput.getTime())) return null;
+        return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
+    }
+
+    // Garante que vamos operar apenas sobre strings
+    if (typeof dateInput !== 'string') {
+        console.log('[parseDateString] Input is not a string, returning null');
+        return null;
+    }
+
+    // Se a string incluir um horário (padrão ISO), pegue apenas a parte da data.
+    const datePart = dateInput.split('T')[0];
+
+    // Regex para validar o formato YYYY-MM-DD
     const regex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!regex.test(dateString)) return null;
+    if (!regex.test(datePart)) return null;
 
     // Extrai ano, mês e dia da string
-    const [year, month, day] = dateString.split('-').map(Number);
+    const [year, month, day] = datePart.split('-').map(Number);
     
     // Cria a data em horário local (sem timezone)
     // Mês é 0-indexed no JavaScript, então subtraímos 1
@@ -36,11 +54,27 @@ function parseDateString(dateString) {
 
 /**
  * Formata uma data para o padrão YYYY-MM-DD usando o timezone local.
- * @param {Date | null | undefined} date - O objeto Date.
- * @returns {string | null} A string no formato YYYY-MM-DD ou null.
+ * Aceita Date ou uma string já no formato YYYY-MM-DD (nesse caso, retorna a própria string).
+ * @param {Date | string | null | undefined} date - O objeto Date ou string.
+ * @returns {string | null} A string no formato YYYY-MM-DD ou null para entradas inválidas.
  */
 function formatDateToString(date) {
-    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    console.log('[formatDateToString] Input:', date, 'Type:', typeof date, 'Constructor:', date?.constructor?.name);
+    
+    if (!date) return null;
+
+    // Se já for string, valida e normaliza via parseDateString
+    if (typeof date === 'string') {
+        const parsed = parseDateString(date);
+        if (!parsed) return null;
+        const year = parsed.getFullYear();
+        const month = (parsed.getMonth() + 1).toString().padStart(2, '0');
+        const day = parsed.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+        console.log('[formatDateToString] Input is not a valid Date, returning null');
         return null;
     }
     
@@ -48,7 +82,9 @@ function formatDateToString(date) {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     
-    return `${year}-${month}-${day}`;
+    const result = `${year}-${month}-${day}`;
+    console.log('[formatDateToString] Result:', result);
+    return result;
 }
 
 

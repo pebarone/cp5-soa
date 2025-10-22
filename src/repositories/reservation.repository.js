@@ -3,17 +3,7 @@ const oracledb = require('oracledb');
 const { execute } = require('../config/database');
 const Reservation = require('../models/reservation.model');
 
-// Helper para converter Date do JavaScript para string YYYY-MM-DD
-function formatDateToOracleString(date) {
-    if (!date) return null;
-    if (!(date instanceof Date)) return null;
-    
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    
-    return `${year}-${month}-${day}`;
-}
+const { formatDateToString } = require('../utils/dateUtils');
 
 // Mapeamento Oracle -> Modelo
 function mapReservationRowToModel(row) {
@@ -42,6 +32,10 @@ class ReservationRepository {
      * @returns {Promise<Reservation>} A reserva criada.
      */
     async create(reservationData) {
+        console.log('[Repository] Creating reservation with data:', JSON.stringify(reservationData, null, 2));
+        console.log('[Repository] checkinExpected type:', typeof reservationData.checkinExpected, 'value:', reservationData.checkinExpected);
+        console.log('[Repository] checkoutExpected type:', typeof reservationData.checkoutExpected, 'value:', reservationData.checkoutExpected);
+        
         const sql = `INSERT INTO RESERVAS_RESERVATIONS (
                         id, guest_id, room_id, checkin_expected, checkout_expected,
                         status, estimated_amount, created_at, updated_at
@@ -52,12 +46,18 @@ class ReservationRepository {
                         :status, :estimated_amount, SYSTIMESTAMP, SYSTIMESTAMP
                      )`; // created_at e updated_at inicializados
 
+        const checkinFormatted = formatDateToString(reservationData.checkinExpected);
+        const checkoutFormatted = formatDateToString(reservationData.checkoutExpected);
+        
+        console.log('[Repository] Formatted checkin:', checkinFormatted);
+        console.log('[Repository] Formatted checkout:', checkoutFormatted);
+
         const binds = {
             id: reservationData.id, // UUID gerado externamente
             guest_id: reservationData.guestId,
             room_id: reservationData.roomId,
-            checkin_expected: formatDateToOracleString(reservationData.checkinExpected),
-            checkout_expected: formatDateToOracleString(reservationData.checkoutExpected),
+            checkin_expected: checkinFormatted,
+            checkout_expected: checkoutFormatted,
             status: reservationData.status || Reservation.STATUS.CREATED,
             estimated_amount: reservationData.estimatedAmount
         };
@@ -175,8 +175,8 @@ class ReservationRepository {
             room_id: roomId,
             status_created: Reservation.STATUS.CREATED,
             status_checked_in: Reservation.STATUS.CHECKED_IN,
-            checkout_date: checkoutDate,
-            checkin_date: checkinDate
+            checkout_date: formatDateToString(checkoutDate),
+            checkin_date: formatDateToString(checkinDate)
         };
 
         if (excludeReservationId) {
