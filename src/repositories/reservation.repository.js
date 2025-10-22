@@ -59,7 +59,7 @@ class ReservationRepository {
      */
     async findById(id) {
         const sql = `SELECT * FROM RESERVAS_RESERVATIONS WHERE id = :id`;
-        const result = await execute(sql, [id]);
+        const result = await execute(sql, { id });
 
         if (result.rows.length === 0) {
             return null;
@@ -210,7 +210,7 @@ class ReservationRepository {
      */
     async delete(id) {
         const sql = `DELETE FROM RESERVAS_RESERVATIONS WHERE id = :id`;
-        const result = await execute(sql, [id], { autoCommit: true });
+        const result = await execute(sql, { id }, { autoCommit: true });
         return result.rowsAffected;
     }
 }

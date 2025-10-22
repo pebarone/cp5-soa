@@ -53,7 +53,7 @@ class GuestRepository {
         const sql = `SELECT id, full_name, document, email, phone, created_at
                      FROM RESERVAS_GUESTS
                      WHERE id = :id`;
-        const result = await execute(sql, [id]); // Binds por array posicional
+        const result = await execute(sql, { id }); // Binds por objeto
 
         if (result.rows.length === 0) {
             return null;
@@ -82,7 +82,7 @@ class GuestRepository {
         const sql = `SELECT id, full_name, document, email, phone, created_at
                      FROM RESERVAS_GUESTS
                      WHERE email = :email`;
-        const result = await execute(sql, [email]);
+        const result = await execute(sql, { email });
 
         if (result.rows.length === 0) {
             return null;
@@ -99,7 +99,7 @@ class GuestRepository {
         const sql = `SELECT id, full_name, document, email, phone, created_at
                      FROM RESERVAS_GUESTS
                      WHERE document = :document`;
-        const result = await execute(sql, [document]);
+        const result = await execute(sql, { document });
 
         if (result.rows.length === 0) {
             return null;
@@ -148,7 +148,7 @@ class GuestRepository {
         // Adicionar verificação se o hóspede tem reservas antes de deletar?
         // Ou confiar na constraint FK? Por ora, confiamos na FK.
         const sql = `DELETE FROM RESERVAS_GUESTS WHERE id = :id`;
-        const result = await execute(sql, [id], { autoCommit: true });
+        const result = await execute(sql, { id }, { autoCommit: true });
         return result.rowsAffected;
     }
 }

@@ -55,7 +55,7 @@ class RoomRepository {
         const sql = `SELECT id, "NUMBER", type, capacity, price_per_night, status
                      FROM RESERVAS_ROOMS
                      WHERE id = :id`;
-        const result = await execute(sql, [id]);
+        const result = await execute(sql, { id });
 
         if (result.rows.length === 0) {
             return null;
@@ -158,7 +158,7 @@ class RoomRepository {
         // Considerar apenas atualizar status para INATIVO?
         // Por ora, tentamos deletar confiando na FK.
         const sql = `DELETE FROM RESERVAS_ROOMS WHERE id = :id`;
-        const result = await execute(sql, [id], { autoCommit: true });
+        const result = await execute(sql, { id }, { autoCommit: true });
         return result.rowsAffected;
     }
 

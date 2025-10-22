@@ -2,8 +2,8 @@
 import { roomsAPI } from './api.js';
 import { showToast, showModal, closeModal, showLoading, hideLoading } from './app.js';
 
-const ROOM_TYPES = ['Solteiro', 'Casal', 'Família', 'Presidencial'];
-const ROOM_STATUS = ['Disponível', 'Ocupado', 'Manutenção', 'Inativo'];
+const ROOM_TYPES = ['STANDARD', 'DELUXE', 'SUITE'];
+const ROOM_STATUS = ['ATIVO', 'INATIVO'];
 
 export function renderRoomsPage() {
     const content = `
@@ -158,7 +158,7 @@ function renderRoomsGrid(rooms) {
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                 </button>
-                ${room.status === 'Inativo' 
+                ${room.status === 'INATIVO' 
                     ? `<button class="btn btn-sm btn-success" onclick="toggleRoomStatus('${room.id}', 'activate')" title="Ativar">Ativar</button>`
                     : `<button class="btn btn-sm btn-warning" onclick="toggleRoomStatus('${room.id}', 'deactivate')" title="Desativar">Desativar</button>`
                 }
@@ -169,10 +169,8 @@ function renderRoomsGrid(rooms) {
 
 function getStatusColor(status) {
     const colors = {
-        'Disponível': 'success',
-        'Ocupado': 'danger',
-        'Manutenção': 'warning',
-        'Inativo': 'secondary'
+        'ATIVO': 'success',
+        'INATIVO': 'secondary'
     };
     return colors[status] || 'secondary';
 }

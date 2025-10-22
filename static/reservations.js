@@ -2,7 +2,21 @@
 import { reservationsAPI, guestsAPI, roomsAPI } from './api.js';
 import { showToast, showModal, closeModal, showLoading, hideLoading } from './app.js';
 
-const RESERVATION_STATUS = ['Pendente', 'Confirmada', 'Check-in', 'Check-out', 'Cancelada'];
+// Status que correspondem ao backend
+const RESERVATION_STATUS = {
+    CREATED: 'CREATED',
+    CHECKED_IN: 'CHECKED_IN',
+    CHECKED_OUT: 'CHECKED_OUT',
+    CANCELED: 'CANCELED'
+};
+
+// Labels amigáveis para exibição
+const STATUS_LABELS = {
+    'CREATED': 'Pendente',
+    'CHECKED_IN': 'Check-in',
+    'CHECKED_OUT': 'Check-out',
+    'CANCELED': 'Cancelada'
+};
 
 export function renderReservationsPage() {
     const content = `
@@ -18,6 +32,30 @@ export function renderReservationsPage() {
                 </svg>
                 Nova Reserva
             </button>
+        </div>
+
+        <div class="filters">
+            <h3 class="filters-title">Filtrar Reservas</h3>
+            <form id="filter-form" class="form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Hóspede</label>
+                        <select class="form-select" name="guestId" id="filter-guest">
+                            <option value="">Todos os hóspedes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quarto</label>
+                        <select class="form-select" name="roomId" id="filter-room">
+                            <option value="">Todos os quartos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions" style="justify-content: flex-start;">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <button type="button" class="btn btn-secondary" id="clear-filters-btn">Limpar</button>
+                </div>
+            </form>
         </div>
 
         <div class="card">
@@ -49,8 +87,14 @@ export function renderReservationsPage() {
     
     // Event Listeners
     document.getElementById('add-reservation-btn').addEventListener('click', () => openReservationModal());
+    document.getElementById('filter-form').addEventListener('submit', handleFilter);
+    document.getElementById('clear-filters-btn').addEventListener('click', () => {
+        document.getElementById('filter-form').reset();
+        loadReservations();
+    });
     
-    // Load reservations
+    // Load filter options and reservations
+    loadFilterOptions();
     loadReservations();
 }
 
@@ -62,6 +106,47 @@ async function loadReservations(filters = {}) {
         showToast(error.message, 'error');
         renderReservationsTable([]);
     }
+}
+
+async function loadFilterOptions() {
+    try {
+        const [guests, rooms] = await Promise.all([
+            guestsAPI.getAll(),
+            roomsAPI.getAll()
+        ]);
+        
+        const guestSelect = document.getElementById('filter-guest');
+        const roomSelect = document.getElementById('filter-room');
+        
+        // Populate guest filter
+        guests.forEach(guest => {
+            const option = document.createElement('option');
+            option.value = guest.id;
+            option.textContent = `${guest.fullName} - ${guest.document}`;
+            guestSelect.appendChild(option);
+        });
+        
+        // Populate room filter
+        rooms.forEach(room => {
+            const option = document.createElement('option');
+            option.value = room.id;
+            option.textContent = `Quarto ${room.number} - ${room.type}`;
+            roomSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar opções de filtro:', error);
+    }
+}
+
+function handleFilter(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const filters = {};
+    
+    if (formData.get('guestId')) filters.guestId = formData.get('guestId');
+    if (formData.get('roomId')) filters.roomId = formData.get('roomId');
+    
+    loadReservations(filters);
 }
 
 function renderReservationsTable(reservations) {
@@ -94,7 +179,7 @@ function renderReservationsTable(reservations) {
             <td>${formatDate(reservation.checkinExpected)}</td>
             <td>${formatDate(reservation.checkoutExpected)}</td>
             <td>
-                <span class="badge badge-${getStatusColor(reservation.status)}">${reservation.status}</span>
+                <span class="badge badge-${getStatusColor(reservation.status)}">${STATUS_LABELS[reservation.status] || reservation.status}</span>
             </td>
             <td class="text-right">
                 <div class="flex gap-1" style="justify-content: flex-end;">
@@ -105,7 +190,7 @@ function renderReservationsTable(reservations) {
                         </svg>
                     </button>
                     
-                    ${reservation.status === 'Pendente' || reservation.status === 'Confirmada' ? `
+                    ${reservation.status === RESERVATION_STATUS.CREATED ? `
                         <button class="btn btn-sm btn-ghost" onclick="editReservation('${reservation.id}')" title="Editar">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -114,7 +199,7 @@ function renderReservationsTable(reservations) {
                         </button>
                     ` : ''}
                     
-                    ${reservation.status === 'Confirmada' ? `
+                    ${reservation.status === RESERVATION_STATUS.CREATED ? `
                         <button class="btn btn-sm btn-success" onclick="performCheckIn('${reservation.id}')" title="Check-in">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="20 6 9 17 4 12"></polyline>
@@ -122,7 +207,7 @@ function renderReservationsTable(reservations) {
                         </button>
                     ` : ''}
                     
-                    ${reservation.status === 'Check-in' ? `
+                    ${reservation.status === RESERVATION_STATUS.CHECKED_IN ? `
                         <button class="btn btn-sm btn-warning" onclick="performCheckOut('${reservation.id}')" title="Check-out">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -132,7 +217,7 @@ function renderReservationsTable(reservations) {
                         </button>
                     ` : ''}
                     
-                    ${reservation.status !== 'Cancelada' && reservation.status !== 'Check-out' ? `
+                    ${reservation.status !== RESERVATION_STATUS.CANCELED && reservation.status !== RESERVATION_STATUS.CHECKED_OUT ? `
                         <button class="btn btn-sm btn-danger" onclick="cancelReservation('${reservation.id}')" title="Cancelar">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -148,11 +233,10 @@ function renderReservationsTable(reservations) {
 
 function getStatusColor(status) {
     const colors = {
-        'Pendente': 'warning',
-        'Confirmada': 'primary',
-        'Check-in': 'success',
-        'Check-out': 'secondary',
-        'Cancelada': 'danger'
+        'CREATED': 'warning',
+        'CHECKED_IN': 'success',
+        'CHECKED_OUT': 'secondary',
+        'CANCELED': 'danger'
     };
     return colors[status] || 'secondary';
 }
@@ -195,7 +279,7 @@ async function openReservationModal(reservation = null) {
                         <label class="form-label required">Quarto</label>
                         <select class="form-select" name="roomId" required>
                             <option value="">Selecione um quarto...</option>
-                            ${rooms.filter(r => r.status === 'Disponível').map(room => `
+                            ${rooms.filter(r => r.status === 'ATIVO').map(room => `
                                 <option value="${room.id}" ${reservation?.roomId === room.id ? 'selected' : ''}>
                                     Quarto ${room.number} - ${room.type} (${room.capacity} pessoas) - R$ ${parseFloat(room.pricePerNight).toFixed(2)}
                                 </option>
@@ -282,7 +366,7 @@ window.viewReservation = async function(id) {
                     <label class="form-label">Status</label>
                     <div>
                         <span class="badge badge-${getStatusColor(reservation.status)}" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-                            ${reservation.status}
+                            ${STATUS_LABELS[reservation.status] || reservation.status}
                         </span>
                     </div>
                 </div>
@@ -334,7 +418,7 @@ window.viewReservation = async function(id) {
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
-                    ${reservation.status === 'Pendente' || reservation.status === 'Confirmada' ? `
+                    ${reservation.status === RESERVATION_STATUS.CREATED ? `
                         <button type="button" class="btn btn-primary" onclick="editReservation('${reservation.id}')">Editar</button>
                     ` : ''}
                 </div>

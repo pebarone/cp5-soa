@@ -130,6 +130,67 @@ class ReservationService {
     }
 
     /**
+     * Atualiza os detalhes de uma reserva (datas previstas).
+     * Só permite atualização se a reserva ainda não teve check-in.
+     * @param {string} id - ID da reserva.
+     * @param {Date} checkinExpected - Nova data de check-in prevista.
+     * @param {Date} checkoutExpected - Nova data de check-out prevista.
+     * @param {number|null} estimatedAmount - Valor estimado (opcional, será recalculado se null).
+     * @returns {Promise<Reservation>} A reserva atualizada.
+     * @throws {NotFoundError} Se não encontrada.
+     * @throws {ConflictError} Se o status não permitir atualização.
+     */
+    async updateDetails(id, checkinExpected, checkoutExpected, estimatedAmount = null) {
+        const reservation = await this.getReservationById(id);
+
+        // Só permite atualizar se ainda estiver no status CREATED
+        if (reservation.status !== Reservation.STATUS.CREATED) {
+            throw new ConflictError(`Não é possível atualizar uma reserva com status '${reservation.status}'. Atualização permitida apenas para status '${Reservation.STATUS.CREATED}'.`);
+        }
+
+        // Valida as novas datas
+        const reservationData = {
+            guestId: reservation.guestId,
+            roomId: reservation.roomId,
+            checkinExpected,
+            checkoutExpected
+        };
+        this._validateReservationData(reservationData);
+
+        // Verifica disponibilidade do quarto nas novas datas
+        const conflictingReservations = await reservationRepository.findConflictingReservations(
+            reservation.roomId,
+            checkinExpected,
+            checkoutExpected,
+            [Reservation.STATUS.CREATED, Reservation.STATUS.CHECKED_IN],
+            id // Exclui a própria reserva da verificação
+        );
+
+        if (conflictingReservations.length > 0) {
+            throw new ConflictError('O quarto não está disponível no período solicitado.');
+        }
+
+        // Recalcula o valor estimado se não foi fornecido
+        let finalEstimatedAmount = estimatedAmount;
+        if (finalEstimatedAmount === null) {
+            const room = await roomRepository.findById(reservation.roomId);
+            const nights = calculateNights(checkinExpected, checkoutExpected);
+            finalEstimatedAmount = nights * room.pricePerNight;
+        }
+
+        // Atualiza a reserva
+        const updatedReservation = await reservationRepository.updateDetails(
+            id,
+            checkinExpected,
+            checkoutExpected,
+            finalEstimatedAmount
+        );
+
+        if (!updatedReservation) throw new NotFoundError('Reserva não encontrada ao tentar atualizar.');
+        return updatedReservation;
+    }
+
+    /**
      * Cancela uma reserva.
      * @param {string} id - ID da reserva.
      * @returns {Promise<Reservation>} A reserva cancelada.
