@@ -10,10 +10,10 @@ class GuestRequestDTO {
      * @param {object} body - O corpo da requisição HTTP.
      */
     constructor(body) {
-        this.fullName = body.fullName; // string, obrigatório
-        this.document = body.document; // string, obrigatório
-        this.email = body.email;       // string, obrigatório
-        this.phone = body.phone;       // string, opcional
+        this.fullName = body.fullName; 
+        this.document = body.document; 
+        this.email = body.email;       
+        this.phone = body.phone;       
     }
 
     static validate() {

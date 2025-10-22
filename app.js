@@ -3,6 +3,7 @@ require('dotenv').config(); // Carrega variáveis de ambiente do arquivo .env
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
+const path = require('path');
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -17,7 +18,7 @@ const swaggerOptions = {
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
-const helmet = require('helmet'); // Para segurança básica (headers HTTP)
+
 // const rateLimit = require('express-rate-limit'); // Descomentar se quiser usar rate limiting
 
 const database = require('./src/config/database'); // Configuração do banco de dados Oracle
@@ -35,7 +36,7 @@ database.startup()
         const app = express();
 
         // Middlewares essenciais
-        app.use(helmet()); // Adiciona headers de segurança
+    
         app.use(express.json()); // Habilita o parsing de JSON no corpo das requisições
         app.use(express.urlencoded({ extended: true })); // Habilita parsing de dados de formulário
 
@@ -48,13 +49,7 @@ database.startup()
         app.use('/api', apiRoutes);
 
         // --- Rota Raiz (Opcional) ---
-        app.get('/', (req, res) => {
-            res.send(`
-                <h1>API de Reserva de Hotel</h1>
-                <p>API está operacional.</p>
-                <p>Acesse a documentação em <a href="/api-docs">/api-docs</a>.</p>
-            `);
-        });
+        app.use('/', express.static(path.join(__dirname, 'static')));
 
         // --- Rota Catch-All para 404 (Não encontrado) ---
         // Deve vir DEPOIS de todas as outras rotas da API

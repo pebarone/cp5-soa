@@ -72,9 +72,9 @@ const idParamValidationRule = [
 ];
 
 const availabilityQueryValidationRules = [
-    query('availableFrom').isISO8601().toDate().withMessage('Data inicial inválida (formato YYYY-MM-DD).'),
-    query('availableTo').isISO8601().toDate().withMessage('Data final inválida (formato YYYY-MM-DD).'),
-    query('capacity').isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.')
+    query('availableFrom').optional().isISO8601().toDate().withMessage('Data inicial inválida (formato YYYY-MM-DD).'),
+    query('availableTo').optional().isISO8601().toDate().withMessage('Data final inválida (formato YYYY-MM-DD).'),
+    query('capacity').optional().isInt({ gt: 0 }).withMessage('Capacidade deve ser um inteiro positivo.')
 ];
 
 // --- Rotas ---
