@@ -34,18 +34,18 @@ class ReservationRepository {
                         id, guest_id, room_id, checkin_expected, checkout_expected,
                         status, estimated_amount, created_at, updated_at
                      ) VALUES (
-                        :id, :guestId, :roomId, :checkinExpected, :checkoutExpected,
-                        :status, :estimatedAmount, SYSTIMESTAMP, SYSTIMESTAMP
+                        :id, :guest_id, :room_id, :checkin_expected, :checkout_expected,
+                        :status, :estimated_amount, SYSTIMESTAMP, SYSTIMESTAMP
                      )`; // created_at e updated_at inicializados
 
         const binds = {
             id: reservationData.id, // UUID gerado externamente
-            guestId: reservationData.guestId,
-            roomId: reservationData.roomId,
-            checkinExpected: reservationData.checkinExpected, // Espera-se objeto Date
-            checkoutExpected: reservationData.checkoutExpected, // Espera-se objeto Date
+            guest_id: reservationData.guestId,
+            room_id: reservationData.roomId,
+            checkin_expected: reservationData.checkinExpected, // Espera-se objeto Date
+            checkout_expected: reservationData.checkoutExpected, // Espera-se objeto Date
             status: reservationData.status || Reservation.STATUS.CREATED,
-            estimatedAmount: reservationData.estimatedAmount
+            estimated_amount: reservationData.estimatedAmount
         };
 
         await execute(sql, binds, { autoCommit: true });
@@ -83,8 +83,8 @@ class ReservationRepository {
      * @returns {Promise<Reservation[]>} Lista de reservas do hóspede.
      */
     async findByGuestId(guestId) {
-        const sql = `SELECT * FROM RESERVAS_RESERVATIONS WHERE guest_id = :guestId ORDER BY checkin_expected`;
-        const result = await execute(sql, [guestId]);
+        const sql = `SELECT * FROM RESERVAS_RESERVATIONS WHERE guest_id = :guest_id ORDER BY checkin_expected`;
+        const result = await execute(sql, { guest_id: guestId });
         return result.rows.map(mapReservationRowToModel);
     }
 
@@ -94,8 +94,8 @@ class ReservationRepository {
      * @returns {Promise<Reservation[]>} Lista de reservas do quarto.
      */
     async findByRoomId(roomId) {
-        const sql = `SELECT * FROM RESERVAS_RESERVATIONS WHERE room_id = :roomId ORDER BY checkin_expected`;
-        const result = await execute(sql, [roomId]);
+        const sql = `SELECT * FROM RESERVAS_RESERVATIONS WHERE room_id = :room_id ORDER BY checkin_expected`;
+        const result = await execute(sql, { room_id: roomId });
         return result.rows.map(mapReservationRowToModel);
     }
 
@@ -109,22 +109,22 @@ class ReservationRepository {
      */
     async findConflictingReservations(roomId, checkinDate, checkoutDate, excludeReservationId = null) {
         let sql = `SELECT * FROM RESERVAS_RESERVATIONS
-                   WHERE room_id = :roomId
-                     AND status IN (:statusCreated, :statusCheckedIn)
-                     AND checkin_expected < :checkoutDate
-                     AND checkout_expected > :checkinDate`;
+                   WHERE room_id = :room_id
+                     AND status IN (:status_created, :status_checked_in)
+                     AND checkin_expected < :checkout_date
+                     AND checkout_expected > :checkin_date`;
 
         const binds = {
-            roomId: roomId,
-            statusCreated: Reservation.STATUS.CREATED,
-            statusCheckedIn: Reservation.STATUS.CHECKED_IN,
-            checkoutDate: checkoutDate,
-            checkinDate: checkinDate
+            room_id: roomId,
+            status_created: Reservation.STATUS.CREATED,
+            status_checked_in: Reservation.STATUS.CHECKED_IN,
+            checkout_date: checkoutDate,
+            checkin_date: checkinDate
         };
 
         if (excludeReservationId) {
-            sql += ` AND id != :excludeId`;
-            binds.excludeId = excludeReservationId;
+            sql += ` AND id != :exclude_id`;
+            binds.exclude_id = excludeReservationId;
         }
 
         const result = await execute(sql, binds);
@@ -142,18 +142,18 @@ class ReservationRepository {
      */
     async updateStatus(id, newStatus, checkinTime = null, checkoutTime = null, finalAmount = null) {
         const sql = `UPDATE RESERVAS_RESERVATIONS
-                     SET status = :newStatus,
-                         checkin_at = :checkinAt,
-                         checkout_at = :checkoutAt,
-                         final_amount = :finalAmount,
+                     SET status = :new_status,
+                         checkin_at = :checkin_at,
+                         checkout_at = :checkout_at,
+                         final_amount = :final_amount,
                          updated_at = SYSTIMESTAMP
                      WHERE id = :id`;
 
         const binds = {
-            newStatus: newStatus,
-            checkinAt: checkinTime,
-            checkoutAt: checkoutTime,
-            finalAmount: finalAmount,
+            new_status: newStatus,
+            checkin_at: checkinTime,
+            checkout_at: checkoutTime,
+            final_amount: finalAmount,
             id: id
         };
 
@@ -176,18 +176,18 @@ class ReservationRepository {
      */
      async updateDetails(id, newCheckinExpected, newCheckoutExpected, newEstimatedAmount) {
         const sql = `UPDATE RESERVAS_RESERVATIONS
-                     SET checkin_expected = :checkinExpected,
-                         checkout_expected = :checkoutExpected,
-                         estimated_amount = :estimatedAmount,
+                     SET checkin_expected = :checkin_expected,
+                         checkout_expected = :checkout_expected,
+                         estimated_amount = :estimated_amount,
                          updated_at = SYSTIMESTAMP
-                     WHERE id = :id AND status = :statusCreated`; // Só permite alterar se CREATED
+                     WHERE id = :id AND status = :status_created`; // Só permite alterar se CREATED
 
         const binds = {
-            checkinExpected: newCheckinExpected,
-            checkoutExpected: newCheckoutExpected,
-            estimatedAmount: newEstimatedAmount,
+            checkin_expected: newCheckinExpected,
+            checkout_expected: newCheckoutExpected,
+            estimated_amount: newEstimatedAmount,
             id: id,
-            statusCreated: Reservation.STATUS.CREATED
+            status_created: Reservation.STATUS.CREATED
         };
 
         const result = await execute(sql, binds, { autoCommit: true });

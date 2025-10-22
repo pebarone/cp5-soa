@@ -24,21 +24,21 @@ class RoomRepository {
      */
     async create(roomData) {
         const sql = `INSERT INTO RESERVAS_ROOMS (id, "NUMBER", type, capacity, price_per_night, status)
-                     VALUES (:id, :number, :type, :capacity, :pricePerNight, :status)`;
+                     VALUES (:id, :room_number, :type, :capacity, :price_per_night, :status)`;
 
         const binds = {
             id: roomData.id, // UUID gerado externamente
-            number: roomData.number,
+            room_number: roomData.number,
             type: roomData.type,
             capacity: roomData.capacity,
-            pricePerNight: roomData.pricePerNight,
+            price_per_night: roomData.pricePerNight,
             status: roomData.status || Room.STATUS.ATIVO // Default para ATIVO
         };
 
         await execute(sql, binds, { autoCommit: true });
         return new Room( // Retorna o objeto com os dados inseridos
             binds.id,
-            binds.number,
+            roomData.number,
             binds.type,
             binds.capacity,
             binds.pricePerNight,
@@ -88,27 +88,27 @@ class RoomRepository {
         const sql = `
             SELECT r.id, r."NUMBER", r.type, r.capacity, r.price_per_night, r.status
             FROM RESERVAS_ROOMS r
-            WHERE r.status = :statusAtivo
-              AND r.capacity >= :requiredCapacity
+            WHERE r.status = :status_ativo
+              AND r.capacity >= :required_capacity
               AND NOT EXISTS (
                   SELECT 1
                   FROM RESERVAS_RESERVATIONS res
                   WHERE res.room_id = r.id
-                    AND res.status IN (:statusCreated, :statusCheckedIn)
+                    AND res.status IN (:status_created, :status_checked_in)
                     -- Verifica sobreposição de datas:
-                    -- (res.checkin_expected < :checkoutDate AND res.checkout_expected > :checkinDate)
-                    AND res.checkin_expected < :checkoutDate AND res.checkout_expected > :checkinDate
+                    -- (res.checkin_expected < :checkout_date AND res.checkout_expected > :checkin_date)
+                    AND res.checkin_expected < :checkout_date AND res.checkout_expected > :checkin_date
               )
             ORDER BY r."NUMBER"
         `;
 
         const binds = {
-            statusAtivo: Room.STATUS.ATIVO,
-            requiredCapacity: requiredCapacity,
-            statusCreated: Reservation.STATUS.CREATED, // Import Reservation model needed
-            statusCheckedIn: Reservation.STATUS.CHECKED_IN, // Import Reservation model needed
-            checkoutDate: checkoutDate, // Certifique-se que são objetos Date
-            checkinDate: checkinDate   // Certifique-se que são objetos Date
+            status_ativo: Room.STATUS.ATIVO,
+            required_capacity: requiredCapacity,
+            status_created: Reservation.STATUS.CREATED, // Import Reservation model needed
+            status_checked_in: Reservation.STATUS.CHECKED_IN, // Import Reservation model needed
+            checkout_date: checkoutDate, // Certifique-se que são objetos Date
+            checkin_date: checkinDate   // Certifique-se que são objetos Date
         };
 
         const result = await execute(sql, binds);
@@ -125,14 +125,14 @@ class RoomRepository {
         const sql = `UPDATE RESERVAS_ROOMS
                      SET type = :type,
                          capacity = :capacity,
-                         price_per_night = :pricePerNight,
+                         price_per_night = :price_per_night,
                          status = :status
                      WHERE id = :id`;
 
         const binds = {
             type: roomData.type,
             capacity: roomData.capacity,
-            pricePerNight: roomData.pricePerNight,
+            price_per_night: roomData.pricePerNight,
             status: roomData.status,
             id: id
         };
@@ -169,8 +169,8 @@ class RoomRepository {
      * @returns {Promise<number>} O número de linhas afetadas.
      */
     async updateStatus(id, newStatus) {
-        const sql = `UPDATE RESERVAS_ROOMS SET status = :newStatus WHERE id = :id`;
-        const binds = { newStatus, id };
+        const sql = `UPDATE RESERVAS_ROOMS SET status = :new_status WHERE id = :id`;
+        const binds = { new_status: newStatus, id };
         const result = await execute(sql, binds, { autoCommit: true });
         return result.rowsAffected;
     }

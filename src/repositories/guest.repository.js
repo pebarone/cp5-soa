@@ -24,11 +24,11 @@ class GuestRepository {
      */
     async create(guestData) {
         const sql = `INSERT INTO RESERVAS_GUESTS (id, full_name, document, email, phone)
-                     VALUES (:id, :fullName, :document, :email, :phone)`;
+                     VALUES (:id, :full_name, :document, :email, :phone)`;
 
         const binds = {
             id: guestData.id, // UUID deve ser gerado antes, na camada de serviço ou controller
-            fullName: guestData.fullName,
+            full_name: guestData.fullName,
             document: guestData.document,
             email: guestData.email,
             phone: guestData.phone
@@ -117,13 +117,13 @@ class GuestRepository {
     async update(id, guestData) {
         // Não atualizamos document ou ID
         const sql = `UPDATE RESERVAS_GUESTS
-                     SET full_name = :fullName,
+                     SET full_name = :full_name,
                          email = :email,
                          phone = :phone
                      WHERE id = :id`;
 
         const binds = {
-            fullName: guestData.fullName,
+            full_name: guestData.fullName,
             email: guestData.email,
             phone: guestData.phone,
             id: id
