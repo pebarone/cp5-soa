@@ -102,7 +102,7 @@ function renderSkeletonLoader() {
             <td><div class="skeleton-line" style="width: 80%;"></div></td>
             <td><div class="skeleton-line" style="width: 70%;"></div></td>
             <td><div class="skeleton-line" style="width: 50%;"></div></td>
-            <td>
+            <td class="text-right">
                 <div class="flex gap-1" style="justify-content: flex-end;">
                     <div class="skeleton-circle"></div>
                     <div class="skeleton-circle"></div>

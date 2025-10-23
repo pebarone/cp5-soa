@@ -852,130 +852,176 @@ body {
 }
 
 /* ===========================
-   Tables
+   Tables - Clean & Aligned
    =========================== */
+
 .table-container {
+    width: 100%;
     overflow-x: auto;
-    overflow-y: visible;
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--color-border);
     background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-lg);
 }
 
 .table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    background-color: var(--color-bg);
-    table-layout: auto;
+    background: var(--color-bg);
+    font-size: var(--font-size-base);
+    min-width: 600px;
 }
 
 .table thead {
     background: var(--color-bg-secondary);
 }
 
-.table th,
-.table td {
-    padding: 1rem 1.5rem;
+.table th, .table td {
+    padding: 0.85rem 1.2rem;
     text-align: left;
     vertical-align: middle;
-    box-sizing: border-box;
 }
 
 .table th {
-    font-size: 0.8125rem;
+    font-size: 0.95em;
     font-weight: 700;
     color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
     border-bottom: 2px solid var(--color-border);
-    white-space: nowrap;
-    line-height: 1.5;
+    background: var(--color-bg-secondary);
+    letter-spacing: 0.03em;
+    text-transform: none;
 }
 
 .table td {
-    font-size: var(--font-size-sm);
-    border-top: 1px solid var(--color-border);
-    transition: color var(--transition-fast);
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+    font-size: 1em;
+    transition: background 0.2s;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .table tbody tr {
-    transition: background-color var(--transition-fast);
-    position: relative;
-}
-
-.table tbody tr::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 3px;
-    height: 100%;
-    background: var(--gradient-accent);
-    opacity: 0;
-    transition: opacity var(--transition-fast);
+    transition: background 0.2s;
 }
 
 .table tbody tr:hover {
-    background-color: var(--color-bg-secondary);
+    background: var(--color-bg-tertiary);
 }
 
-.table tbody tr:hover::before {
-    opacity: 1;
+/* Alignment helpers */
+.table .text-left {
+    text-align: left !important;
+}
+.table .text-center {
+    text-align: center !important;
+}
+.table .text-right {
+    text-align: right !important;
 }
 
-.table tbody tr:hover td {
+/* Action column width */
+.table th.text-right,
+.table td.text-right {
+    width: 120px;
+    min-width: 100px;
+    max-width: 150px;
+}
+
+/* Table content styling */
+.table td strong {
+    font-weight: 600;
     color: var(--color-primary);
 }
-
-/* Prevent table buttons from causing overflow */
-.table .btn:hover:not(:disabled) {
-    transform: none;
+.table td .badge {
+    white-space: nowrap;
 }
 
+/* Table buttons */
+.table .btn {
+    margin: 0;
+    padding: 0.4rem 0.7rem;
+    min-width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    font-size: 0.95em;
+}
 .table .btn svg {
-    transition: transform var(--transition-base);
-}
-
-.table .btn:hover:not(:disabled) svg {
-    transform: scale(1.15);
-}
-
-/* Skeleton Loader for Tables */
-.table-skeleton {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-.table-skeleton td {
-    padding: var(--spacing-md);
-}
-
-.skeleton-line {
+    width: 16px;
     height: 16px;
-    background: linear-gradient(
-        90deg,
-        var(--color-bg-secondary) 0%,
-        var(--color-bg-tertiary) 50%,
-        var(--color-bg-secondary) 100%
-    );
-    background-size: 200% 100%;
-    border-radius: var(--radius-sm);
-    animation: shimmer 1.5s ease-in-out infinite;
+}
+.table .btn:hover:not(:disabled) {
+    background: var(--color-bg-tertiary);
+    box-shadow: var(--shadow-sm);
 }
 
-.skeleton-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(
-        90deg,
-        var(--color-bg-secondary) 0%,
-        var(--color-bg-tertiary) 50%,
-        var(--color-bg-secondary) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
+/* Action buttons group */
+.table .action-buttons,
+.table td .flex {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+}
+.table td.text-right .flex {
+    justify-content: flex-end;
+}
+
+/* Empty state in table */
+.table .empty-state {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+.table .empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--spacing-sm);
+    opacity: 0.4;
+}
+.table .empty-state h3 {
+    font-size: var(--font-size-lg);
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xs);
+}
+.table .empty-state p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* Responsive table */
+@media (max-width: 900px) {
+    .table {
+        min-width: 400px;
+        font-size: 0.95em;
+    }
+    .table th, .table td {
+        padding: 0.7rem 0.7rem;
+    }
+    .table th.text-right,
+    .table td.text-right {
+        width: 80px;
+        min-width: 80px;
+        max-width: 100px;
+    }
+}
+
+@media (max-width: 600px) {
+    .table-container {
+        border-radius: var(--radius-md);
+    }
+    .table {
+        min-width: 320px;
+        font-size: 0.9em;
+    }
+    .table th, .table td {
+        padding: 0.5rem 0.5rem;
+    }
 }
 
 /* ===========================
