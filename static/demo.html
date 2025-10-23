@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Frontend Moderno - Demonstração</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: #764ba2;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .feature-desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge-new {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .badge-improved {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .badge-animation {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #333;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 10px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Frontend Moderno - Hotel Reservations</h1>
+        <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+            Sistema de gestão hoteleira com design moderno, animações fluidas e experiência de usuário excepcional.
+        </p>
+
+        <h2>✨ Principais Melhorias</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">🌓</div>
+                <div class="feature-title">Dark Mode</div>
+                <div class="feature-desc">
+                    Tema escuro completo com transições suaves e persistência de preferências
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon">🎬</div>
+                <div class="feature-title">Animações Fluidas</div>
+                <div class="feature-desc">
+                    8+ animações customizadas com cubic-bezier para movimentos naturais
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon">🔍</div>
+                <div class="feature-title">Busca Inteligente</div>
+                <div class="feature-desc">
+                    Busca em tempo real com debounce de 300ms para melhor performance
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon">🎨</div>
+                <div class="feature-title">Gradientes Modernos</div>
+                <div class="feature-desc">
+                    Sistema de gradientes vibrantes aplicados em botões, cards e títulos
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon">💎</div>
+                <div class="feature-title">Glassmorphism</div>
+                <div class="feature-desc">
+                    Efeitos de vidro com backdrop-filter para um visual premium
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <div class="feature-title">Skeleton Loaders</div>
+                <div class="feature-desc">
+                    Estados de carregamento elegantes com animação shimmer
+                </div>
+            </div>
+        </div>
+
+        <h2>🎯 Recursos Implementados</h2>
+        
+        <h3>Design System</h3>
+        <ul>
+            <li><span class="badge badge-new">NOVO</span> CSS Variables completo com suporte a dark mode</li>
+            <li><span class="badge badge-new">NOVO</span> Paleta de gradientes moderna</li>
+            <li><span class="badge badge-improved">MELHORADO</span> Sistema de espaçamento consistente</li>
+            <li><span class="badge badge-improved">MELHORADO</span> Typography scale otimizada</li>
+        </ul>
+
+        <h3>Animações & Transições</h3>
+        <ul>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> <code>fadeIn</code>, <code>fadeInUp</code>, <code>fadeInDown</code></li>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> <code>slideInRight</code> para elementos laterais</li>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> <code>scaleIn</code> com bounce effect</li>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> <code>shimmer</code> para skeleton loaders</li>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> <code>pulse</code> para badges ativos</li>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> <code>float</code> para ícones</li>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> Stagger animations para listas</li>
+            <li><span class="badge badge-animation">ANIMAÇÃO</span> Page transitions suaves</li>
+        </ul>
+
+        <h3>Componentes Modernos</h3>
+        <ul>
+            <li><strong>Botões:</strong> Ripple effect, gradientes, hover com elevação 3D</li>
+            <li><strong>Cards:</strong> Glassmorphism, borda superior animada, sombras coloridas</li>
+            <li><strong>Forms:</strong> Focus states aprimorados, validação visual, labels animadas</li>
+            <li><strong>Tables:</strong> Hover rows com highlight, skeleton loaders, scroll customizado</li>
+            <li><strong>Modals:</strong> Backdrop blur, animação bounce, scroll customizado</li>
+            <li><strong>Toasts:</strong> Gradientes por tipo, entrada com bounce, barra lateral</li>
+            <li><strong>Badges:</strong> Gradientes sutis, bordas destacadas, pulse opcional</li>
+        </ul>
+
+        <div class="highlight-box">
+            <h3 style="margin-top: 0;">💡 Destaques Técnicos</h3>
+            <ul style="margin-bottom: 0;">
+                <li><strong>Transições GPU-accelerated:</strong> transform e opacity para performance máxima</li>
+                <li><strong>Cubic Bezier customizado:</strong> <code>cubic-bezier(0.68, -0.55, 0.265, 1.55)</code></li>
+                <li><strong>Backdrop Filter:</strong> Blur de 10-20px para glassmorphism</li>
+                <li><strong>CSS Variables:</strong> 60+ tokens de design</li>
+                <li><strong>Debounce:</strong> Otimização de busca com 300ms de delay</li>
+            </ul>
+        </div>
+
+        <h2>📱 Responsividade</h2>
+        <ul>
+            <li>Mobile-first approach</li>
+            <li>Breakpoint em 768px otimizado</li>
+            <li>Navegação adaptativa (ícones no mobile)</li>
+            <li>Grid system flexível</li>
+            <li>Tabelas com scroll horizontal</li>
+        </ul>
+
+        <h2>🎨 CSS 100% Autoral</h2>
+        <div class="highlight-box">
+            <p>
+                <strong>Zero frameworks externos!</strong> Todo o CSS foi desenvolvido do zero,
+                sem Bootstrap, Tailwind ou qualquer biblioteca. Isso garante:
+            </p>
+            <ul>
+                <li>✅ Controle total sobre o design</li>
+                <li>✅ Bundle size reduzido</li>
+                <li>✅ Performance otimizada</li>
+                <li>✅ Customização ilimitada</li>
+                <li>✅ Sem classes desnecessárias</li>
+            </ul>
+        </div>
+
+        <h2>🚀 Como Testar</h2>
+        <ol>
+            <li>Abra o sistema no navegador</li>
+            <li>Teste o <strong>toggle de dark mode</strong> (botão sol/lua no header)</li>
+            <li>Navegue entre páginas e observe as <strong>transições suaves</strong></li>
+            <li>Use a <strong>busca em tempo real</strong> na página de Hóspedes</li>
+            <li>Passe o mouse sobre cards, botões e tabelas para ver as <strong>animações</strong></li>
+            <li>Abra modais e observe o <strong>backdrop blur</strong></li>
+            <li>Teste em diferentes <strong>tamanhos de tela</strong></li>
+        </ol>
+
+        <h2>📊 Métricas de Melhoria</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-title">60+</div>
+                <div class="feature-desc">CSS Variables para design system</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">8+</div>
+                <div class="feature-desc">Animações customizadas</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">100%</div>
+                <div class="feature-desc">CSS autoral sem frameworks</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">2 Temas</div>
+                <div class="feature-desc">Light + Dark mode completo</div>
+            </div>
+        </div>
+
+        <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem; color: #667eea;">
+            <strong>✨ Desenvolvido com 💜 e CSS Autoral ✨</strong>
+        </p>
+    </div>
+</body>
+</html>

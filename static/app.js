@@ -7,6 +7,7 @@ import { renderReservationsPage } from './reservations.js';
 const app = {
     currentPage: 'guests',
     loadingCount: 0,
+    theme: localStorage.getItem('theme') || 'light',
 };
 
 // Page Routes
@@ -18,7 +19,9 @@ const routes = {
 
 // Initialize Application
 function init() {
+    setupTheme();
     setupNavigation();
+    setupThemeToggle();
     
     // Handle initial route
     const hash = window.location.hash.slice(1) || 'guests';
@@ -29,6 +32,56 @@ function init() {
         const page = window.location.hash.slice(1) || 'guests';
         navigateTo(page);
     });
+}
+
+// Setup Theme
+function setupTheme() {
+    document.documentElement.setAttribute('data-theme', app.theme);
+}
+
+// Setup Theme Toggle
+function setupThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    // Update icon based on current theme
+    updateThemeIcon();
+    
+    themeToggle.addEventListener('click', () => {
+        app.theme = app.theme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', app.theme);
+        document.documentElement.setAttribute('data-theme', app.theme);
+        updateThemeIcon();
+        
+        // Add animation feedback
+        themeToggle.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            themeToggle.style.transform = 'scale(1)';
+        }, 100);
+    });
+}
+
+// Update Theme Icon
+function updateThemeIcon() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const isDark = app.theme === 'dark';
+    
+    themeToggle.innerHTML = isDark ? `
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    ` : `
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    `;
 }
 
 // Setup Navigation
@@ -60,11 +113,22 @@ export function navigateTo(page) {
         }
     });
     
-    // Render page
-    routes[page]();
+    // Add page transition animation
+    const pageContent = document.getElementById('page-content');
+    pageContent.style.opacity = '0';
+    pageContent.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        // Render page
+        routes[page]();
+        
+        // Animate in
+        pageContent.style.opacity = '1';
+        pageContent.style.transform = 'translateY(0)';
+    }, 150);
 }
 
-// Toast Notifications
+// Toast Notifications with enhanced animations
 export function showToast(message, type = 'info') {
     const toast = document.getElementById('toast');
     

@@ -2,6 +2,9 @@
 import { guestsAPI, getErrorMessage } from './api.js';
 import { showToast, showModal, closeModal, showLoading, hideLoading } from './app.js';
 
+let allGuests = [];
+let searchTimeout;
+
 export function renderGuestsPage() {
     const content = `
         <div class="page-header">
@@ -16,6 +19,23 @@ export function renderGuestsPage() {
                 </svg>
                 Novo Hóspede
             </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="filters">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="guest-search" 
+                    class="form-input" 
+                    placeholder="🔍 Buscar por nome, email ou documento..."
+                    autocomplete="off"
+                />
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </div>
         </div>
 
         <div class="card">
@@ -47,18 +67,71 @@ export function renderGuestsPage() {
     // Event Listeners
     document.getElementById('add-guest-btn').addEventListener('click', () => openGuestModal());
     
+    // Search with debounce
+    const searchInput = document.getElementById('guest-search');
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterGuests(e.target.value);
+        }, 300);
+    });
+    
     // Load guests
     loadGuests();
 }
 
 async function loadGuests() {
+    // Show skeleton loader
+    renderSkeletonLoader();
+    
     try {
         const guests = await guestsAPI.getAll();
+        allGuests = guests;
         renderGuestsTable(guests);
     } catch (error) {
         showToast(getErrorMessage(error), 'error');
         renderGuestsTable([]);
     }
+}
+
+function renderSkeletonLoader() {
+    const tbody = document.getElementById('guests-table-body');
+    const skeletonRows = Array(5).fill(0).map(() => `
+        <tr class="table-skeleton">
+            <td><div class="skeleton-line" style="width: 60%;"></div></td>
+            <td><div class="skeleton-line" style="width: 80%;"></div></td>
+            <td><div class="skeleton-line" style="width: 70%;"></div></td>
+            <td><div class="skeleton-line" style="width: 50%;"></div></td>
+            <td>
+                <div class="flex gap-1" style="justify-content: flex-end;">
+                    <div class="skeleton-circle"></div>
+                    <div class="skeleton-circle"></div>
+                    <div class="skeleton-circle"></div>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    tbody.innerHTML = skeletonRows;
+}
+
+function filterGuests(searchTerm) {
+    if (!searchTerm) {
+        renderGuestsTable(allGuests);
+        return;
+    }
+    
+    const filtered = allGuests.filter(guest => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            guest.fullName.toLowerCase().includes(searchLower) ||
+            guest.email.toLowerCase().includes(searchLower) ||
+            guest.document.includes(searchTerm) ||
+            (guest.phone && guest.phone.includes(searchTerm))
+        );
+    });
+    
+    renderGuestsTable(filtered);
 }
 
 function renderGuestsTable(guests) {
