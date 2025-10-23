@@ -10,9 +10,6 @@ const YAML = require('yamljs');
 const path = require('path');
 
 const swaggerDocument = YAML.load(path.join(__dirname, './src/config/swagger.yaml'));
-
-// const rateLimit = require('express-rate-limit'); // Descomentar se quiser usar rate limiting
-
 const database = require('./src/config/database'); // Configuração do banco de dados Oracle
 const apiRoutes = require('./src/routes'); // Roteador principal da API (src/routes/index.js)
 const errorHandler = require('./src/middlewares/errorHandler'); // Middleware global de erro
@@ -64,6 +61,8 @@ database.startup()
         app.listen(PORT, () => {
             console.log(`Servidor rodando na porta ${PORT}`);
             console.log(`Documentação Swagger disponível em http://localhost:${PORT}/api-docs`);
+            console.log(`Timezone configurado para: ${process.env.TZ}`);
+            console.log(`Aplicação disponível em http://localhost:${PORT}/`);
         });
 
     })

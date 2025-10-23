@@ -304,13 +304,49 @@ class ReservationService {
     async getReservationsByGuest(guestId) {
         // Valida se o hóspede existe primeiro
         await guestRepository.findById(guestId); // Lança NotFoundError se não existir
-        return await reservationRepository.findByGuestId(guestId);
+        const reservations = await reservationRepository.findByGuestId(guestId);
+        
+        // Popular dados de guest e room para cada reserva
+        const populatedReservations = await Promise.all(
+            reservations.map(async (reservation) => {
+                const [guest, room] = await Promise.all([
+                    guestRepository.findById(reservation.guestId),
+                    roomRepository.findById(reservation.roomId)
+                ]);
+                
+                return {
+                    ...reservation,
+                    guest,
+                    room
+                };
+            })
+        );
+        
+        return populatedReservations;
     }
 
     async getReservationsByRoom(roomId) {
          // Valida se o quarto existe primeiro
         await roomRepository.findById(roomId); // Lança NotFoundError se não existir
-        return await reservationRepository.findByRoomId(roomId);
+        const reservations = await reservationRepository.findByRoomId(roomId);
+        
+        // Popular dados de guest e room para cada reserva
+        const populatedReservations = await Promise.all(
+            reservations.map(async (reservation) => {
+                const [guest, room] = await Promise.all([
+                    guestRepository.findById(reservation.guestId),
+                    roomRepository.findById(reservation.roomId)
+                ]);
+                
+                return {
+                    ...reservation,
+                    guest,
+                    room
+                };
+            })
+        );
+        
+        return populatedReservations;
     }
 
     async findAll() {
