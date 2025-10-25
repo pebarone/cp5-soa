@@ -6,13 +6,11 @@
 - Nome: Ian Cancian Nachtergaele - RM: 98387
 
 ## Como usar?
-A aplicação tem um deploy no render, para uso sem necessidade de configuração local: https://assessor-virtual-api.onrender.com. 
+A aplicação tem um deploy no render, para uso sem necessidade de configuração local: https://cp5-soa-xmsmzoghiq-rj.a.run.app
 
 Mas, mais abaixo, há também uma explicação de como configurar o ambiente para execução em servidor de desenvolvimento.
 
 A documentação dos endpoints pode ser encontrada aqui: https://assessor-virtual-api.onrender.com/api-docs
-
-P.S. Para menor latência, use o deploy do Google Cloud: https://assessor-virtual-api-684499909473.southamerica-east1.run.app. 
 
 ## 📋 Descrição
 
