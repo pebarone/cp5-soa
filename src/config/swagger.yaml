@@ -4,6 +4,8 @@ info:
   description: API para gerenciamento de reservas de hotel, hóspedes e quartos.
   version: 1.0.0
 servers:
+  - url: https://cp5-soa-684499909473.southamerica-east1.run.app/api
+    description: Servidor de desenvolvimento
   - url: http://localhost:3000/api
     description: Servidor de desenvolvimento
 tags:

@@ -57,7 +57,7 @@ database.startup()
         app.use(errorHandler);
 
         // --- Inicialização do Servidor ---
-        const PORT = process.env.SERVER_PORT || 3000; 
+        const PORT = process.env.SERVER_PORT || 3000; // Usa a porta do .env ou 3000 como padrão
         app.listen(PORT, () => {
             console.log(`Servidor rodando na porta ${PORT}`);
             console.log(`Documentação Swagger disponível em http://localhost:${PORT}/api-docs`);
