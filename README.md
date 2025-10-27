@@ -331,34 +331,35 @@ Isso criará:
 - 10 quartos de diferentes tipos
 - 10 reservas de exemplo
 
-## 🔄 Migrações Versionadas (Flyway)
+## 🔄 Migrações Versionadas (Knex.js)
 
-O projeto utiliza **Flyway** para gerenciar migrações de banco de dados de forma versionada e rastreável. Todas as migrações são executadas automaticamente no startup da aplicação dentro do Docker.
+O projeto utiliza **Knex.js** para gerenciar migrações de banco de dados de forma versionada e rastreável. Todas as migrações são executadas automaticamente no startup da aplicação.
 
 ### Estrutura de Migrações
 
 ```
 db/
 ├── migrations/
-│   ├── V1__init.sql           # Criação inicial das tabelas
-│   ├── V2__add_column.sql     # Exemplo de migração futura
-│   └── V3__new_feature.sql    # Exemplo de migração futura
-└── migrate.js                  # Script executor do Flyway
+│   ├── 20250127000001_init.js      # Criação inicial das tabelas
+│   ├── 20250127000002_example.js   # Exemplo de migração futura
+│   └── 20250127000003_feature.js   # Exemplo de migração futura
+├── knexfile.js                      # Configuração do Knex
+└── seeds/                           # Seeds separados das migrações
+    └── seed.js
 ```
 
 ### Convenção de Nomenclatura
 
-As migrações seguem o padrão Flyway:
-- **Prefixo**: `V` (versionada)
-- **Versão**: Número sequencial (1, 2, 3, ...)
-- **Separador**: `__` (dois underscores)
+As migrações seguem o padrão Knex (timestamp):
+- **Prefixo**: Timestamp (YYYYMMDDHHmmss)
+- **Separador**: `_` (underscore)
 - **Descrição**: Nome descritivo em snake_case
-- **Extensão**: `.sql`
+- **Extensão**: `.js`
 
 Exemplos:
-- `V1__init.sql` - Criação inicial
-- `V2__add_guest_address.sql` - Adiciona coluna de endereço
-- `V3__create_payments_table.sql` - Cria tabela de pagamentos
+- `20250127000001_init.js` - Criação inicial
+- `20250127000002_add_guest_address.js` - Adiciona coluna de endereço
+- `20250127000003_create_payments.js` - Cria tabela de pagamentos
 
 ### Comandos Disponíveis
 
@@ -367,10 +368,13 @@ Exemplos:
 npm run migrate
 
 # Ver status de todas as migrações
-npm run migrate:info
+npm run migrate:status
 
-# Validar migrações aplicadas
-npm run migrate:validate
+# Reverter última migração (rollback)
+npm run migrate:rollback
+
+# Criar nova migração
+npm run migrate:make nome_da_migracao
 ```
 
 ### Execução Automática no Docker
