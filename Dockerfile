@@ -6,11 +6,10 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY pnpm-lock.yaml ./
+COPY package-lock.json ./
 
-# Install pnpm and dependencies
-RUN npm install -g pnpm@10.16.1
-RUN pnpm install
+# Install npm and dependencies
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -21,15 +20,12 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm@10.16.1
-
 # Copy package files
 COPY package*.json ./
-COPY pnpm-lock.yaml ./
+COPY package-lock.json ./
 
 # Install only production dependencies
-RUN pnpm install --prod
+RUN npm install --prod
 
 # Copy application files from builder
 COPY --from=builder /app/src ./src
