@@ -24,6 +24,13 @@ oracledb.getConnection({
   sleep 5
 done
 
+# Run database migrations using Flyway
+echo "🔄 Running database migrations..."
+node db/migrate.js || {
+  echo "⚠️  Migration failed! Check the error above."
+  exit 1
+}
+
 # Start the application
 echo "🌟 Starting application server..."
 node app.js &

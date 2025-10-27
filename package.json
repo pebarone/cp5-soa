@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node app.js",
     "test": "jest",
-    "prestart": "npm run test"
+    "prestart": "npm run test",
+    "migrate": "node db/migrate.js",
+    "migrate:info": "node db/migrate.js info",
+    "migrate:validate": "node db/migrate.js validate"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +21,7 @@
     "express-rate-limit": "^8.1.0",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
+    "node-flywaydb": "^3.0.7",
     "oracledb": "^6.10.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

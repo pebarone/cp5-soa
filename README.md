@@ -331,6 +331,107 @@ Isso criará:
 - 10 quartos de diferentes tipos
 - 10 reservas de exemplo
 
+## 🔄 Migrações Versionadas (Flyway)
+
+O projeto utiliza **Flyway** para gerenciar migrações de banco de dados de forma versionada e rastreável. Todas as migrações são executadas automaticamente no startup da aplicação dentro do Docker.
+
+### Estrutura de Migrações
+
+```
+db/
+├── migrations/
+│   ├── V1__init.sql           # Criação inicial das tabelas
+│   ├── V2__add_column.sql     # Exemplo de migração futura
+│   └── V3__new_feature.sql    # Exemplo de migração futura
+└── migrate.js                  # Script executor do Flyway
+```
+
+### Convenção de Nomenclatura
+
+As migrações seguem o padrão Flyway:
+- **Prefixo**: `V` (versionada)
+- **Versão**: Número sequencial (1, 2, 3, ...)
+- **Separador**: `__` (dois underscores)
+- **Descrição**: Nome descritivo em snake_case
+- **Extensão**: `.sql`
+
+Exemplos:
+- `V1__init.sql` - Criação inicial
+- `V2__add_guest_address.sql` - Adiciona coluna de endereço
+- `V3__create_payments_table.sql` - Cria tabela de pagamentos
+
+### Comandos Disponíveis
+
+```bash
+# Executar migrações pendentes
+npm run migrate
+
+# Ver status de todas as migrações
+npm run migrate:info
+
+# Validar migrações aplicadas
+npm run migrate:validate
+```
+
+### Execução Automática no Docker
+
+O `docker-entrypoint.sh` executa automaticamente as migrações no startup:
+
+```bash
+1. Aguarda o banco de dados estar pronto
+2. Executa migrações pendentes (npm run migrate)
+3. Inicia a aplicação
+4. Executa seed se AUTO_SEED=true
+```
+
+### Histórico de Migrações
+
+O Flyway mantém um registro de todas as migrações executadas na tabela `flyway_schema_history`:
+
+| Version | Description | Script | Installed On | State |
+|---------|-------------|--------|--------------|-------|
+| 1 | init | V1__init.sql | 2025-01-15 10:30:00 | Success |
+
+### Como Criar uma Nova Migração
+
+1. Crie um arquivo em `db/migrations/` seguindo a convenção:
+   ```
+   V2__add_guest_address.sql
+   ```
+
+2. Escreva o SQL da migração:
+   ```sql
+   -- Adiciona coluna de endereço na tabela de hóspedes
+   ALTER TABLE RESERVAS_GUESTS ADD address VARCHAR2(200);
+   ```
+
+3. A migração será executada automaticamente no próximo deploy ou via comando:
+   ```bash
+   npm run migrate
+   ```
+
+### Boas Práticas
+
+✅ **FAÇA:**
+- Sempre crie migrações incrementais
+- Use nomes descritivos
+- Teste migrações localmente antes de comitar
+- Nunca modifique migrações já aplicadas em produção
+
+❌ **NÃO FAÇA:**
+- Alterar migrações já executadas
+- Usar comandos destrutivos (DROP, TRUNCATE) sem backup
+- Pular números de versão
+
+### Rollback
+
+O Flyway não suporta rollback automático. Para reverter mudanças, crie uma nova migração com as alterações inversas:
+
+```sql
+-- V3__revert_add_guest_address.sql
+ALTER TABLE RESERVAS_GUESTS DROP COLUMN address;
+```
+
 ## 🧪 Testes
 
 O projeto inclui testes automatizados usando **Jest**:

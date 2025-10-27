@@ -5,6 +5,12 @@ import { showToast, showModal, closeModal, showLoading, hideLoading } from './ap
 const ROOM_TYPES = ['STANDARD', 'DELUXE', 'SUITE'];
 const ROOM_STATUS = ['ATIVO', 'INATIVO'];
 
+// Helper para formatar data sem problemas de timezone
+function formatDateBR(dateString) {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+}
+
 export function renderRoomsPage() {
     // Data mínima = hoje
     const today = new Date().toISOString().split('T')[0];
@@ -128,19 +134,15 @@ function handleFilter(e) {
         }
         
         // Valida se check-out é posterior ao check-in
-        const fromDate = new Date(availableFrom);
-        const toDate = new Date(availableTo);
-        
-        if (toDate <= fromDate) {
+        if (availableTo <= availableFrom) {
             showToast('A data de check-out deve ser posterior à data de check-in.', 'error');
             return;
         }
         
         // Valida se as datas não estão no passado
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = new Date().toISOString().split('T')[0];
         
-        if (fromDate < today) {
+        if (availableFrom < today) {
             showToast('A data de check-in não pode ser no passado.', 'error');
             return;
         }
@@ -200,8 +202,8 @@ function renderRoomsGrid(rooms, filters = {}) {
     
     // Exibe mensagem de sucesso e badge quando houver filtros aplicados
     if (hasFilters) {
-        const fromDate = filters.availableFrom ? new Date(filters.availableFrom).toLocaleDateString('pt-BR') : '';
-        const toDate = filters.availableTo ? new Date(filters.availableTo).toLocaleDateString('pt-BR') : '';
+        const fromDate = filters.availableFrom ? formatDateBR(filters.availableFrom) : '';
+        const toDate = filters.availableTo ? formatDateBR(filters.availableTo) : '';
         const capacityText = filters.capacity ? ` (capacidade mínima: ${filters.capacity})` : '';
         showToast(`✓ ${rooms.length} quarto(s) disponível(is) de ${fromDate} a ${toDate}${capacityText}`, 'success');
         

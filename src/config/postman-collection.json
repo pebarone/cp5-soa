@@ -1,0 +1,510 @@
+{
+  "info": {
+    "name": "Hotel Reservations API",
+    "description": "API para gerenciamento de reservas de hotel, hóspedes e quartos.\n\n**Servidor de Produção:** https://cp5-soa-684499909473.southamerica-east1.run.app/api\n**Servidor Local:** http://localhost:3000/api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "0"
+  },
+  "item": [
+    {
+      "name": "Guests",
+      "item": [
+        {
+          "name": "Criar Hóspede",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"João Silva\",\n  \"document\": \"12345678901\",\n  \"email\": \"joao.silva@example.com\",\n  \"phone\": \"11999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/guests",
+              "host": ["{{baseUrl}}"],
+              "path": ["guests"]
+            },
+            "description": "Cria um novo hóspede no sistema"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Hóspedes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/guests",
+              "host": ["{{baseUrl}}"],
+              "path": ["guests"]
+            },
+            "description": "Retorna a lista de todos os hóspedes cadastrados"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Hóspede por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/guests/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["guests", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{guestId}}",
+                  "description": "ID do hóspede (UUID)"
+                }
+              ]
+            },
+            "description": "Busca um hóspede específico pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Hóspede",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"João Silva Santos\",\n  \"email\": \"joao.santos@example.com\",\n  \"phone\": \"11988888888\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/guests/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["guests", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{guestId}}",
+                  "description": "ID do hóspede (UUID)"
+                }
+              ]
+            },
+            "description": "Atualiza os dados de um hóspede existente"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Hóspede",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/guests/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["guests", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{guestId}}",
+                  "description": "ID do hóspede (UUID)"
+                }
+              ]
+            },
+            "description": "Remove um hóspede do sistema"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rooms",
+      "item": [
+        {
+          "name": "Criar Quarto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"number\": 101,\n  \"type\": \"STANDARD\",\n  \"capacity\": 2,\n  \"pricePerNight\": 250.00,\n  \"status\": \"ATIVO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms"]
+            },
+            "description": "Cria um novo quarto no hotel"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Quartos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms"]
+            },
+            "description": "Retorna a lista de todos os quartos"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Quartos Disponíveis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms?availableFrom=2025-11-01&availableTo=2025-11-05&capacity=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms"],
+              "query": [
+                {
+                  "key": "availableFrom",
+                  "value": "2025-11-01",
+                  "description": "Data inicial (YYYY-MM-DD)"
+                },
+                {
+                  "key": "availableTo",
+                  "value": "2025-11-05",
+                  "description": "Data final (YYYY-MM-DD)"
+                },
+                {
+                  "key": "capacity",
+                  "value": "2",
+                  "description": "Capacidade mínima"
+                }
+              ]
+            },
+            "description": "Busca quartos disponíveis em um período específico"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Quarto por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{roomId}}",
+                  "description": "ID do quarto (UUID)"
+                }
+              ]
+            },
+            "description": "Busca um quarto específico pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Quarto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"DELUXE\",\n  \"capacity\": 3,\n  \"pricePerNight\": 380.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rooms/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{roomId}}",
+                  "description": "ID do quarto (UUID)"
+                }
+              ]
+            },
+            "description": "Atualiza os dados de um quarto existente"
+          },
+          "response": []
+        },
+        {
+          "name": "Ativar Quarto",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/:id/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", ":id", "activate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{roomId}}",
+                  "description": "ID do quarto (UUID)"
+                }
+              ]
+            },
+            "description": "Ativa um quarto (status ATIVO)"
+          },
+          "response": []
+        },
+        {
+          "name": "Desativar Quarto",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/:id/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", ":id", "deactivate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{roomId}}",
+                  "description": "ID do quarto (UUID)"
+                }
+              ]
+            },
+            "description": "Desativa um quarto (status INATIVO)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Criar Reserva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guestId\": \"{{guestId}}\",\n  \"roomId\": \"{{roomId}}\",\n  \"checkinExpected\": \"2025-11-10\",\n  \"checkoutExpected\": \"2025-11-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservations",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations"]
+            },
+            "description": "Cria uma nova reserva no sistema"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Reservas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservations",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations"]
+            },
+            "description": "Retorna a lista de todas as reservas"
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar Reservas por Hóspede",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservations?guestId={{guestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations"],
+              "query": [
+                {
+                  "key": "guestId",
+                  "value": "{{guestId}}",
+                  "description": "ID do hóspede (UUID)"
+                }
+              ]
+            },
+            "description": "Busca reservas de um hóspede específico"
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar Reservas por Quarto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservations?roomId={{roomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations"],
+              "query": [
+                {
+                  "key": "roomId",
+                  "value": "{{roomId}}",
+                  "description": "ID do quarto (UUID)"
+                }
+              ]
+            },
+            "description": "Busca reservas de um quarto específico"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Reserva por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{reservationId}}",
+                  "description": "ID da reserva (UUID)"
+                }
+              ]
+            },
+            "description": "Busca uma reserva específica pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Reserva",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"checkinExpected\": \"2025-11-12\",\n  \"checkoutExpected\": \"2025-11-17\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservations/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{reservationId}}",
+                  "description": "ID da reserva (UUID)"
+                }
+              ]
+            },
+            "description": "Atualiza as datas de uma reserva (apenas se status=CREATED)"
+          },
+          "response": []
+        },
+        {
+          "name": "Check-in",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/:id/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations", ":id", "check-in"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{reservationId}}",
+                  "description": "ID da reserva (UUID)"
+                }
+              ]
+            },
+            "description": "Realiza check-in de uma reserva (permitido apenas no dia previsto)"
+          },
+          "response": []
+        },
+        {
+          "name": "Check-out",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/:id/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations", ":id", "check-out"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{reservationId}}",
+                  "description": "ID da reserva (UUID)"
+                }
+              ]
+            },
+            "description": "Realiza check-out de uma reserva e calcula valor final"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar Reserva",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/:id/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations", ":id", "cancel"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{reservationId}}",
+                  "description": "ID da reserva (UUID)"
+                }
+              ]
+            },
+            "description": "Cancela uma reserva (permitido apenas se status=CREATED)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://cp5-soa-684499909473.southamerica-east1.run.app/api",
+      "type": "string"
+    },
+    {
+      "key": "guestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "roomId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reservationId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

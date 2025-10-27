@@ -1,7 +1,16 @@
 openapi: 3.0.0
 info:
   title: Hotel Reservation API
-  description: API para gerenciamento de reservas de hotel, hóspedes e quartos.
+  description: |
+    API para gerenciamento de reservas de hotel, hóspedes e quartos.
+    
+    ## 📥 Download Postman Collection
+    
+    Você pode baixar a collection completa do Postman para testar a API:
+    
+    [**🔽 Baixar Collection do Postman**](/api/postman-collection)
+    
+    Após baixar, importe o arquivo no Postman e configure a variável `baseUrl` para o servidor desejado.
   version: 1.0.0
 servers:
   - url: https://cp5-soa-684499909473.southamerica-east1.run.app/api
