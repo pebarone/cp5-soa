@@ -1,6 +1,6 @@
 // db/seeds/seed.js
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://cp5-soa-684499909473.southamerica-east1.run.app/api';
 
 async function postData(url = '', data = {}) {
     const response = await fetch(url, {

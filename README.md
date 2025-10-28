@@ -93,6 +93,8 @@ cp5-soa/
 ├── .env                        # Variáveis de ambiente (não versionado)
 │
 ├── db/
+│   ├── knexfile.js            # Configuração do Knex para migrações
+│   ├── safe-migrate.js        # Script de migração seguro
 │   ├── migrations/
 │   │   └── V1__init.sql       # Script de criação das tabelas Oracle
 │   └── seeds/
@@ -300,10 +302,13 @@ PORT=3000
 
 #### 2.4. Execute as Migrações do Banco de Dados
 
-Execute o script SQL de migração no seu banco Oracle:
+As migrações são executadas automaticamente ao iniciar a aplicação com `npm start`, mas você também pode executá-las manualmente:
 
-Conecte ao Oracle e execute:
- `db/migrations/V1__init.sql`.
+```bash
+npm run migrate
+```
+
+Este comando usa o Knex para aplicar todas as migrações pendentes de forma segura.
 
 #### 2.5. Inicie a Aplicação
 ```bash

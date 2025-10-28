@@ -24,9 +24,9 @@ oracledb.getConnection({
   sleep 5
 done
 
-# Run database migrations using Flyway
+# Run database migrations using Knex
 echo "🔄 Running database migrations..."
-node db/migrate.js || {
+npm run migrate || {
   echo "⚠️  Migration failed! Check the error above."
   exit 1
 }
