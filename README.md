@@ -1,4 +1,6 @@
 # Sistema de Reserva de Hotel 🏨
+<img width="1569" height="896" alt="image" src="https://github.com/user-attachments/assets/8bca2f10-2f1e-4a90-8c52-054a7c4b4dce" />
+
 ## Integrantes do Grupo
 - Nome: Pedro Augusto Carneiro Barone Bomfim - RM: 99781 
 - Nome: João Pedro de Albuquerque Oliveira - RM: 551579
