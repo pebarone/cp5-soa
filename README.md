@@ -7,7 +7,7 @@
 - Nome: Matheus Augusto Santos Rego - RM:551466
 
 ## Como usar?
-A aplicação tem um deploy no render, para uso sem necessidade de configuração local: https://cp5-soa-xmsmzoghiq-rj.a.run.app
+A aplicação tem um deploy no google cloud run, para uso sem necessidade de configuração local: https://cp5-soa-xmsmzoghiq-rj.a.run.app
 
 Mas, mais abaixo, há também uma explicação de como configurar o ambiente para execução em servidor de desenvolvimento.
 
