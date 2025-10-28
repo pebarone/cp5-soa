@@ -215,11 +215,7 @@ docker run -d \
   pbrnx/cp5-soa:latest
 
 # Ou usando arquivo .env
-docker run -d \
-  --name hotel-reservations-api \
-  -p 3000:3000 \
-  --env-file .env \
-  pbrnx/cp5-soa:latest
+docker run -d --name hotel-reservations-api -p 3000:3000 --env-file .env pbrnx/cp5-soa:latest
 ```
 
 > **💡 Dica**: O container automaticamente:
@@ -391,23 +387,34 @@ O `docker-entrypoint.sh` executa automaticamente as migrações no startup:
 
 ### Histórico de Migrações
 
-O Flyway mantém um registro de todas as migrações executadas na tabela `flyway_schema_history`:
+O Knex mantém um registro de todas as migrações executadas na tabela `knex_migrations`:
 
-| Version | Description | Script | Installed On | State |
-|---------|-------------|--------|--------------|-------|
-| 1 | init | V1__init.sql | 2025-01-15 10:30:00 | Success |
+| Id | Name | Batch | Migration Time |
+|----|------|-------|----------------|
+| 1 | 20250127000001_init.js | 1 | 2025-01-15 10:30:00 |
 
 ### Como Criar uma Nova Migração
 
-1. Crie um arquivo em `db/migrations/` seguindo a convenção:
+1. Crie um arquivo em `db/migrations/` seguindo a convenção usando o comando:
+   ```bash
+   npm run migrate:make add_guest_address
    ```
-   V2__add_guest_address.sql
-   ```
+   
+   Isso criará um arquivo como: `20250127000002_add_guest_address.js`
 
-2. Escreva o SQL da migração:
-   ```sql
-   -- Adiciona coluna de endereço na tabela de hóspedes
-   ALTER TABLE RESERVAS_GUESTS ADD address VARCHAR2(200);
+2. Escreva a migração usando Knex:
+   ```javascript
+   exports.up = async function(knex) {
+     await knex.schema.table('RESERVAS_GUESTS', (table) => {
+       table.string('address', 200);
+     });
+   };
+
+   exports.down = async function(knex) {
+     await knex.schema.table('RESERVAS_GUESTS', (table) => {
+       table.dropColumn('address');
+     });
+   };
    ```
 
 3. A migração será executada automaticamente no próximo deploy ou via comando:
@@ -430,11 +437,21 @@ O Flyway mantém um registro de todas as migrações executadas na tabela `flywa
 
 ### Rollback
 
-O Flyway não suporta rollback automático. Para reverter mudanças, crie uma nova migração com as alterações inversas:
+O Knex suporta rollback através do comando `npm run migrate:rollback`, que reverterá o último batch de migrações. Para reverter mudanças específicas, você também pode criar uma nova migração com as alterações inversas:
 
-```sql
--- V3__revert_add_guest_address.sql
-ALTER TABLE RESERVAS_GUESTS DROP COLUMN address;
+```javascript
+// Exemplo: 20250127000003_revert_add_guest_address.js
+exports.up = async function(knex) {
+  await knex.schema.table('RESERVAS_GUESTS', (table) => {
+    table.dropColumn('address');
+  });
+};
+
+exports.down = async function(knex) {
+  await knex.schema.table('RESERVAS_GUESTS', (table) => {
+    table.string('address', 200);
+  });
+};
 ```
 
 ## 🧪 Testes

@@ -82,8 +82,8 @@ class ReservationService {
              throw new ConflictError(`Quarto ${room.number} não está ativo.`);
         }
 
-        // Valida Capacidade (MVP considera 1 hóspede, ajustar se DTO incluir nº de hóspedes)
-        const numberOfGuests = 1; // Ajustar se a API permitir especificar hóspedes
+        // Valida Capacidade
+        const numberOfGuests = reservationData.numberOfGuests || 1;
         if (numberOfGuests > room.capacity) {
             throw new ConflictError(`Número de hóspedes (${numberOfGuests}) excede a capacidade do quarto (${room.capacity}).`); //
         }

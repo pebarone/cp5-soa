@@ -1,5 +1,7 @@
 -- ========= SCRIPT DE CRIAÇÃO DE TABELAS PARA ORACLE - SISTEMA DE RESERVAS (v2) ==========
 
+-- ==========Use apenas para limpar a tabela caso necessário! =============
+
 -- --- LIMPEZA (Apaga tabelas existentes na ordem correta para FKs) ---
 BEGIN
     EXECUTE IMMEDIATE 'DROP TABLE RESERVAS_RESERVATIONS CASCADE CONSTRAINTS';

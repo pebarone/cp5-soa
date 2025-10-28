@@ -36,7 +36,7 @@ class ReservationController {
             roomId: requestData.roomId,
             checkinExpected: checkinExpectedDate,
             checkoutExpected: checkoutExpectedDate,
-            // numberOfGuests: requestData.numberOfGuests // Se adicionar no DTO
+            numberOfGuests: requestData.numberOfGuests
         };
 
         const newReservation = await reservationService.createReservation(reservationDataForService);

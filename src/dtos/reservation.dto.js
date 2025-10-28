@@ -15,8 +15,7 @@ class CreateReservationRequestDTO {
         // As datas virão como string da API, precisam ser convertidas para Date no controller/service
         this.checkinExpected = body.checkinExpected;   // string (formato 'YYYY-MM-DD'), obrigatório
         this.checkoutExpected = body.checkoutExpected; // string (formato 'YYYY-MM-DD'), obrigatório
-        // numberOfGuests é opcional, default para 1 no service
-        // this.numberOfGuests = body.numberOfGuests || 1;
+        this.numberOfGuests = body.numberOfGuests || 1; // number, opcional (default 1)
     }
 
     /**
@@ -26,6 +25,7 @@ class CreateReservationRequestDTO {
         return [
             body('guestId').isUUID(4).withMessage('ID de Hóspede inválido (UUID v4).'),
             body('roomId').isUUID(4).withMessage('ID de Quarto inválido (UUID v4).'),
+            body('numberOfGuests').optional().isInt({ gt: 0 }).withMessage('Número de hóspedes deve ser um inteiro positivo.'),
             body('checkinExpected')
                 .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Data de check-in prevista deve estar no formato YYYY-MM-DD.')
                 .custom((value) => {

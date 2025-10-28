@@ -764,6 +764,13 @@ body {
     color: var(--color-danger);
 }
 
+.form-hint {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    margin-top: var(--spacing-xs);
+}
+
 .form-input,
 .form-select,
 .form-textarea {

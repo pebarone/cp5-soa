@@ -327,6 +327,13 @@ async function openReservationModal(reservation = null) {
                             `).join('')}
                         </select>
                     </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">Número de Hóspedes</label>
+                        <input type="number" class="form-input" name="numberOfGuests" 
+                               min="1" value="${reservation?.numberOfGuests || 1}" required>
+                        <small class="form-hint">Verifique a capacidade do quarto selecionado</small>
+                    </div>
                 ` : ''}
                 
                 <div class="form-row">
@@ -353,6 +360,35 @@ async function openReservationModal(reservation = null) {
         showModal(title, modalContent);
 
         document.getElementById('cancel-btn').addEventListener('click', closeModal);
+        
+        // Add validation for room capacity vs number of guests
+        if (!isEdit) {
+            const roomSelect = document.querySelector('select[name="roomId"]');
+            const guestsInput = document.querySelector('input[name="numberOfGuests"]');
+            
+            if (roomSelect && guestsInput) {
+                const validateCapacity = () => {
+                    const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+                    if (selectedOption && selectedOption.value) {
+                        const room = rooms.find(r => r.id === selectedOption.value);
+                        if (room) {
+                            const numGuests = parseInt(guestsInput.value) || 1; 
+                            
+                            if (numGuests > room.capacity) {
+                                guestsInput.setCustomValidity(`Capacidade máxima: ${room.capacity} pessoa(s)`);
+                            } else {
+                                guestsInput.setCustomValidity('');
+                            }
+                        }
+                    }
+                };
+                
+                roomSelect.addEventListener('change', validateCapacity);
+                guestsInput.addEventListener('input', validateCapacity);
+                validateCapacity(); // Validate on load
+            }
+        }
+        
         document.getElementById('reservation-form').addEventListener('submit', (e) => {
             e.preventDefault();
             handleReservationSubmit(e.target, reservation?.id);
@@ -374,6 +410,7 @@ async function handleReservationSubmit(form, reservationId = null) {
     if (!reservationId) {
         reservationData.guestId = formData.get('guestId');
         reservationData.roomId = formData.get('roomId');
+        reservationData.numberOfGuests = parseInt(formData.get('numberOfGuests')) || 1;
     }
 
     try {
@@ -422,7 +459,12 @@ window.viewReservation = async function(id) {
                     <div class="form-group">
                         <label class="form-label">Quarto</label>
                         <p style="font-weight: 600;">Quarto ${reservation.room?.number || 'N/A'}</p>
-                        <p class="text-muted" style="font-size: 0.875rem;">${reservation.room?.type || ''}</p>
+                        <p class="text-muted" style="font-size: 0.875rem;">${reservation.room?.type || ''} - Capacidade: ${reservation.room?.capacity || 'N/A'} pessoa(s)</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Número de Hóspedes</label>
+                        <p style="font-weight: 600;">${reservation.numberOfGuests || 1} pessoa(s)</p>
                     </div>
                 </div>
                 

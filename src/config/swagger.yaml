@@ -577,42 +577,60 @@ components:
         id:
           type: string
           format: uuid
+          description: ID único da reserva
         guestId:
           type: string
           format: uuid
+          description: ID do hóspede
         roomId:
           type: string
           format: uuid
+          description: ID do quarto
+        numberOfGuests:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Número de hóspedes
         checkinExpected:
           type: string
           format: date
+          description: Data prevista para check-in
         checkoutExpected:
           type: string
           format: date
+          description: Data prevista para check-out
         status:
           type: string
           enum: [CREATED, CHECKED_IN, CHECKED_OUT, CANCELED]
+          description: Status atual da reserva
         pricePerNightAtBooking:
           type: number
           format: float
+          description: Preço por noite no momento da reserva
         checkinAt:
           type: string
           format: date-time
+          description: Data/hora real do check-in
         checkoutAt:
           type: string
           format: date-time
+          description: Data/hora real do check-out
         estimatedAmount:
           type: number
           format: float
+          description: Valor estimado da reserva
         finalAmount:
           type: number
           format: float
+          description: Valor final calculado no check-out
         createdAt:
           type: string
           format: date-time
+          description: Data/hora de criação
         updatedAt:
           type: string
           format: date-time
+          description: Data/hora da última atualização
         guest:
           $ref: '#/components/schemas/Guest'
         room:
@@ -621,6 +639,7 @@ components:
         id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
         guestId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
         roomId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        numberOfGuests: 2
         checkinExpected: "2024-12-20"
         checkoutExpected: "2024-12-25"
         status: "CREATED"
@@ -638,18 +657,28 @@ components:
         guestId:
           type: string
           format: uuid
+          description: ID do hóspede
         roomId:
           type: string
           format: uuid
+          description: ID do quarto
+        numberOfGuests:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Número de hóspedes (deve respeitar a capacidade do quarto)
         checkinExpected:
           type: string
           format: date
+          description: Data prevista para check-in (formato YYYY-MM-DD)
         checkoutExpected:
           type: string
           format: date
+          description: Data prevista para check-out (formato YYYY-MM-DD)
       example:
         guestId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
         roomId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        numberOfGuests: 2
         checkinExpected: "2024-12-20"
         checkoutExpected: "2024-12-25"
     UpdateReservation:
