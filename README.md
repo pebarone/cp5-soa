@@ -3,7 +3,6 @@
 - Nome: Pedro Augusto Carneiro Barone Bomfim - RM: 99781 
 - Nome: João Pedro de Albuquerque Oliveira - RM: 551579
 - Nome: Matheus Augusto Santos Rego - RM:551466
-- Nome: Ian Cancian Nachtergaele - RM: 98387
 
 ## Como usar?
 A aplicação tem um deploy no render, para uso sem necessidade de configuração local: https://cp5-soa-xmsmzoghiq-rj.a.run.app
