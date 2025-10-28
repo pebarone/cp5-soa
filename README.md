@@ -9,7 +9,7 @@ A aplicação tem um deploy no render, para uso sem necessidade de configuraçã
 
 Mas, mais abaixo, há também uma explicação de como configurar o ambiente para execução em servidor de desenvolvimento.
 
-A documentação dos endpoints pode ser encontrada aqui: https://assessor-virtual-api.onrender.com/api-docs
+A documentação dos endpoints pode ser encontrada aqui: https://cp5-soa-xmsmzoghiq-rj.a.run.app/api-docs
 
 ## 📋 Descrição
 
