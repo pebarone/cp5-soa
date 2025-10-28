@@ -58,11 +58,37 @@ database.startup()
 
         // --- Inicialização do Servidor ---
         const PORT = process.env.SERVER_PORT || 3000; // Usa a porta do .env ou 3000 como padrão
-        app.listen(PORT, () => {
+        app.listen(PORT, async () => {
             console.log(`Servidor rodando na porta ${PORT}`);
             console.log(`Documentação Swagger disponível em http://localhost:${PORT}/api-docs`);
             console.log(`Timezone configurado para: ${process.env.TZ}`);
             console.log(`Aplicação disponível em http://localhost:${PORT}/`);
+            
+            // Auto-seed se habilitado
+            if (process.env.AUTO_SEED === 'true') {
+                console.log('\n🌱 AUTO_SEED habilitado. Executando seed...');
+                try {
+                    // Aguarda 2 segundos para garantir que o servidor está pronto
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    // Executa o seed
+                    const { exec } = require('child_process');
+                    exec('node db/seeds/seed.js', (error, stdout, stderr) => {
+                        if (error) {
+                            console.error('⚠️  Erro ao executar seed:', error.message);
+                            console.error(stderr);
+                            return;
+                        }
+                        console.log(stdout);
+                        console.log('✅ Seed executado com sucesso!\n');
+                    });
+                } catch (seedError) {
+                    console.error('⚠️  Erro ao executar seed:', seedError);
+                }
+            } else {
+                console.log(`\n⏭️  AUTO_SEED desabilitado (AUTO_SEED=${process.env.AUTO_SEED})`);
+                console.log('   Para popular o banco, execute: node db/seeds/seed.js\n');
+            }
         });
 
     })
